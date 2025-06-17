@@ -1,0 +1,1 @@
+export { default } from "file:///Users/hua/Documents/esim/frontend/node_modules/@nuxt/vite-builder/dist/runtime/client.manifest.mjs"
