@@ -214,22 +214,7 @@ router.put('/:id', userController.updateUser)
 // 更新用戶備注
 router.patch('/:id/note', userController.updateUserNote)
 
-router.get('/orders/:orderId/iccid', async (req, res) => {
-  try {
-    const { orderId } = req.params
-    const order = await Order.findByPk(parseInt(orderId), {
-      attributes: ['iccid']
-    })
-
-    if (!order) {
-      return res.status(404).json({ message: '訂單不存在' })
-    }
-
-    res.json({ iccid: order.iccid })
-  } catch (error) {
-    console.error('查詢 ICCID 失敗:', error)
-    res.status(500).json({ message: '查詢 ICCID 失敗' })
-  }
-})
+// 獲取訂單 ICCID
+router.get('/orders/:orderId/iccid', userController.getOrderICCID)
 
 module.exports = router 

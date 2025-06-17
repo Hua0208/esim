@@ -203,6 +203,33 @@ const userController = {
       console.error('獲取用戶詳情失敗:', error)
       return responseHandler.error(res, '獲取用戶詳情失敗', 500, error.message)
     }
+  },
+
+  // 獲取訂單 ICCID
+  async getOrderICCID(req, res) {
+    try {
+      const { orderId } = req.params;
+      const { Card } = require('../models');
+      
+      const order = await Order.findByPk(parseInt(orderId), {
+        include: [{
+          model: Card,
+          as: 'Card',
+          attributes: ['iccid']
+        }]
+      });
+
+      if (!order) {
+        return responseHandler.notFound(res, '訂單不存在');
+      }
+
+      return responseHandler.success(res, { 
+        iccid: order.Card?.iccid || null 
+      }, '成功獲取 ICCID');
+    } catch (error) {
+      console.error('查詢 ICCID 失敗:', error);
+      return responseHandler.error(res, '查詢 ICCID 失敗', 500, error.message);
+    }
   }
 }
 

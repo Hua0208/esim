@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authController = require('../controllers/authController');
 
 /**
  * @swagger
@@ -92,54 +93,7 @@ const router = express.Router();
  *       500:
  *         description: 伺服器錯誤
  */
-router.post('/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Demo 帳號驗證
-        if (username === 'admin' && password === 'admin') {
-            const user = {
-                id: 1,
-                fullName: 'John Doe',
-                username: 'admin',
-                avatar: '/images/avatars/avatar-cat.png',
-                email: 'admin@demo.com',
-                role: 'admin',
-                abilityRules: [
-                    { action: 'manage', subject: 'all' }
-                ]
-            };
-            return res.json({
-                user,
-                accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MX0.fhc3wykrAnRpcKApKhXiahxaOe8PSHatad31NuIZ0Zg'
-            });
-        } else if (username === 'client' && password === 'client') {
-            const user = {
-                id: 2,
-                fullName: 'Jane Doe',
-                username: 'client',
-                avatar: '/images/avatars/avatar-2.png',
-                email: 'client@demo.com',
-                role: 'client',
-                abilityRules: [
-                    { action: 'read', subject: 'Auth' },
-                    { action: 'read', subject: 'AclDemo' }
-                ]
-            };
-            return res.json({
-                user,
-                accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mn0.cat2xMrZLn0FwicdGtZNzL7ifDTAKWB0k1RurSWjdnw'
-            });
-        } else {
-            return res.status(401).json({ message: '帳號或密碼錯誤' });
-        }
-    } catch (error) {
-        res.status(500).json({ 
-            message: '登入失敗',
-            error: error.message 
-        });
-    }
-});
+router.post('/login', authController.login);
 
 /**
  * @swagger
@@ -159,18 +113,6 @@ router.post('/login', async (req, res) => {
  *       500:
  *         description: 錯誤處理失敗
  */
-router.get('/error', (req, res) => {
-    const { error } = req.query;
-    try {
-        const errorData = JSON.parse(error);
-        res.status(errorData.status || 500).json({
-            message: errorData.message || '發生錯誤'
-        });
-    } catch (e) {
-        res.status(500).json({
-            message: '錯誤處理失敗'
-        });
-    }
-});
+router.get('/error', authController.handleError);
 
 module.exports = router; 
