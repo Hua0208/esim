@@ -343,5 +343,50 @@
   "Type": "類型",
   "Amount": "金額",
   "Reference": "單號",
-  "Info": "資訊"
+  "Info": "資訊",
+  "dashboards": {
+    "info": {
+      "title": "系統介紹",
+      "description": "歡迎使用 eSIM 管理系統。本系統提供完整的 eSIM 生命週期管理解決方案，幫助您輕鬆管理 eSIM 訂單、用戶和數據。",
+      "features": {
+        "esim": {
+          "title": "eSIM 管理",
+          "description": "提供完整的 eSIM 生命週期管理，包括訂購、啟用、監控和停用等功能。"
+        },
+        "user": {
+          "title": "用戶管理",
+          "description": "集中管理用戶帳戶、權限和群組，確保系統安全性和可訪問性。"
+        },
+        "order": {
+          "title": "訂單追蹤",
+          "description": "即時追蹤訂單狀態，提供詳細的訂單歷史記錄和報表。"
+        },
+        "analytics": {
+          "title": "數據分析",
+          "description": "提供全面的數據分析工具，幫助您了解使用情況和業務趨勢。"
+        }
+      },
+      "kyc": {
+        "title": "KYC 認證重要說明",
+        "description": "對於 3HK 等特定供應商的 eSIM 服務，客戶需要完成 KYC 認證。請注意以下重要事項：",
+        "point1": "請在簡訊中完成系統商註明的認證流程",
+        "point2": "使用證件掃描時，請保持原始內容不變",
+        "point3": "任何對掃描內容結果修改都將導致進入人工審核流程"
+      },
+      "systemInfo": {
+        "title": "系統資訊",
+        "version": "版本",
+        "lastUpdate": "最後更新",
+        "features": "主要功能"
+      },
+      "systemFeatures": {
+        "providers": "支援多種 eSIM 供應商",
+        "realtime": "即時訂單處理",
+        "automation": "自動化工作流程",
+        "multilingual": "多語言支援",
+        "responsive": "響應式設計",
+        "security": "安全認證"
+      }
+    }
+  }
 }

@@ -209,5 +209,50 @@
         "item": "item"
       }
     }
+  },
+  "dashboards": {
+    "info": {
+      "title": "System Introduction",
+      "description": "Welcome to the eSIM Management System. This system provides a complete eSIM lifecycle management solution to help you easily manage eSIM orders, users, and data.",
+      "features": {
+        "esim": {
+          "title": "eSIM Management",
+          "description": "Provides complete eSIM lifecycle management including ordering, activation, monitoring, and deactivation features."
+        },
+        "user": {
+          "title": "User Management",
+          "description": "Centralized management of user accounts, permissions, and groups to ensure system security and accessibility."
+        },
+        "order": {
+          "title": "Order Tracking",
+          "description": "Real-time order status tracking with detailed order history and reports."
+        },
+        "analytics": {
+          "title": "Data Analytics",
+          "description": "Comprehensive data analytics tools to help you understand usage patterns and business trends."
+        }
+      },
+      "kyc": {
+        "title": "Important KYC Verification Notice",
+        "description": "For eSIM services from specific providers such as 3HK, customers need to complete KYC verification. Please note the following important points:",
+        "point1": "Please complete the verification process as specified in the SMS from the system",
+        "point2": "When scanning documents, please keep the original content unchanged",
+        "point3": "Any modification to the scan results will result in manual review process"
+      },
+      "systemInfo": {
+        "title": "System Information",
+        "version": "Version",
+        "lastUpdate": "Last Update",
+        "features": "Main Features"
+      },
+      "systemFeatures": {
+        "providers": "Support for multiple eSIM providers",
+        "realtime": "Real-time order processing",
+        "automation": "Automated workflows",
+        "multilingual": "Multi-language support",
+        "responsive": "Responsive design",
+        "security": "Security certification"
+      }
+    }
   }
 }

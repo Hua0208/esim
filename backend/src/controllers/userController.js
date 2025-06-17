@@ -16,7 +16,8 @@ const userController = {
           },
           {
             model: Order,
-            attributes: []
+            attributes: [],
+            where: { status: 'completed' }
           }
         ],
         attributes: {

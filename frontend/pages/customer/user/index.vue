@@ -157,27 +157,6 @@ const handleViewOrders = (user: User) => {
   navigateTo(`/customer/user/${user.id}`)
 }
 
-// 刪除用戶
-const handleDeleteUser = async (id: number) => {
-  if (!confirm('確定要刪除此用戶嗎？')) return
-  try {
-    const { data, error } = await useApi<ApiResponse<void>>(`/users/${id}`, {
-      method: 'DELETE'
-    })
-    
-    if (error.value || data.value?.code !== 200) {
-      showSnackbar(error.value?.message || data.value?.message || '刪除用戶失敗', 'error')
-      return
-    }
-    
-    showSnackbar('刪除用戶成功', 'success')
-    refreshUsers()
-  } catch (error) {
-    console.error('刪除用戶失敗:', error)
-    showSnackbar('刪除用戶失敗，請稍後再試', 'error')
-  }
-}
-
 // 編輯備註
 const handleEditNote = (user: User) => {
   selectedUser.value = user
@@ -307,15 +286,7 @@ onMounted(() => {
             </template>
 
             <template #item.actions="{ item }">
-              <VBtn
-                icon
-                variant="text"
-                color="error"
-                size="small"
-                @click="handleDeleteUser(item.id)"
-              >
-                <VIcon icon="tabler-trash" />
-              </VBtn>
+              <!-- 刪除按鈕已移除 -->
             </template>
 
             <template #no-data>

@@ -6,26 +6,28 @@
   //middleware: ['sidebase-auth'],
 //})
 
+const { t } = useI18n()
+
 const features = [
   {
-    title: 'eSIM 管理',
+    title: t('dashboards.info.features.esim.title'),
     icon: 'tabler-device-mobile',
-    description: '提供完整的 eSIM 生命週期管理，包括訂購、啟用、監控和停用等功能。',
+    description: t('dashboards.info.features.esim.description'),
   },
   {
-    title: '用戶管理',
+    title: t('dashboards.info.features.user.title'),
     icon: 'tabler-users',
-    description: '集中管理用戶帳戶、權限和群組，確保系統安全性和可訪問性。',
+    description: t('dashboards.info.features.user.description'),
   },
   {
-    title: '訂單追蹤',
+    title: t('dashboards.info.features.order.title'),
     icon: 'tabler-shopping-cart',
-    description: '即時追蹤訂單狀態，提供詳細的訂單歷史記錄和報表。',
+    description: t('dashboards.info.features.order.description'),
   },
   {
-    title: '數據分析',
+    title: t('dashboards.info.features.analytics.title'),
     icon: 'tabler-chart-bar',
-    description: '提供全面的數據分析工具，幫助您了解使用情況和業務趨勢。',
+    description: t('dashboards.info.features.analytics.description'),
   },
 ]
 
@@ -33,12 +35,12 @@ const systemInfo = {
   version: '1.0.0',
   lastUpdate: '2025-06-15',
   features: [
-    '支援多種 eSIM 供應商',
-    '即時訂單處理',
-    '自動化工作流程',
-    '多語言支援',
-    '響應式設計',
-    '安全認證',
+    t('dashboards.info.systemFeatures.providers'),
+    t('dashboards.info.systemFeatures.realtime'),
+    t('dashboards.info.systemFeatures.automation'),
+    t('dashboards.info.systemFeatures.multilingual'),
+    t('dashboards.info.systemFeatures.responsive'),
+    t('dashboards.info.systemFeatures.security'),
   ],
 }
 </script>
@@ -49,10 +51,10 @@ const systemInfo = {
       <VRow>
         <VCol cols="12">
           <h2 class="text-h4 mb-6">
-            系統介紹
+            {{ t('dashboards.info.title') }}
           </h2>
           <p class="text-body-1 mb-6">
-            歡迎使用 eSIM 管理系統。本系統提供完整的 eSIM 生命週期管理解決方案，幫助您輕鬆管理 eSIM 訂單、用戶和數據。
+            {{ t('dashboards.info.description') }}
           </p>
         </VCol>
 
@@ -106,16 +108,16 @@ const systemInfo = {
                 />
                 <div>
                   <h4 class="text-h6 mb-2">
-                    KYC 認證重要說明
+                    {{ t('dashboards.info.kyc.title') }}
                   </h4>
                   <p class="text-body-1 mb-2">
-                    對於 3HK 等特定供應商的 eSIM 服務，客戶需要完成 KYC 認證。請注意以下重要事項：
+                    {{ t('dashboards.info.kyc.description') }}
                   </p>
                   <ul class="text-body-1 ps-4 mb-0">
-                    <li>請在簡訊中完成系統商註明的認證流程</li>
-                    <li>使用證件掃描時，請保持原始內容不變</li>
+                    <li>{{ t('dashboards.info.kyc.point1') }}</li>
+                    <li>{{ t('dashboards.info.kyc.point2') }}</li>
                     <li class="font-weight-bold text-error">
-                      任何對掃描內容結果修改都將導致進入人工審核流程
+                      {{ t('dashboards.info.kyc.point3') }}
                     </li>
                   </ul>
                 </div>
@@ -126,7 +128,7 @@ const systemInfo = {
 
         <VCol cols="12">
           <h3 class="text-h5 mb-4">
-            系統資訊
+            {{ t('dashboards.info.systemInfo.title') }}
           </h3>
           <VCard variant="outlined">
             <VCardText>
@@ -141,7 +143,7 @@ const systemInfo = {
                     />
                     <div>
                       <div class="text-subtitle-2">
-                        版本
+                        {{ t('dashboards.info.systemInfo.version') }}
                       </div>
                       <div class="text-body-1">
                         {{ systemInfo.version }}
@@ -159,7 +161,7 @@ const systemInfo = {
                     />
                     <div>
                       <div class="text-subtitle-2">
-                        最後更新
+                        {{ t('dashboards.info.systemInfo.lastUpdate') }}
                       </div>
                       <div class="text-body-1">
                         {{ systemInfo.lastUpdate }}
@@ -172,7 +174,7 @@ const systemInfo = {
               <VDivider class="my-4" />
 
               <h4 class="text-h6 mb-4">
-                主要功能
+                {{ t('dashboards.info.systemInfo.features') }}
               </h4>
               <VRow>
                 <VCol

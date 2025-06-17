@@ -11,6 +11,8 @@ const redirects: RouteRecordRaw[] = [
     path: '/',
     name: 'index',
     meta: {
+      action: 'read',
+      subject: 'Auth',
       middleware: to => {
         const { data: sessionData } = useAuth()
 
