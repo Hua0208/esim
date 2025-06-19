@@ -90,7 +90,7 @@ const esimController = {
             } else {
                 console.log('訂單創建條件不滿足，跳過創建');
             }
-            return responseHandler.success(res, result, 'eSIM 購買成功');
+            return responseHandler.success(res, result, 'eSIM 購買訂單成功');
         } catch (error) {
             return responseHandler.error(res, error.message || 'eSIM 購買失敗', error.status || 500, error);
         }
@@ -130,6 +130,21 @@ const esimController = {
                 return responseHandler.badRequest(res, 'topup product price is invalid');
             }
 
+            // 檢查系統餘額（包含所有記錄）
+            const allBillings = await Billing.findAll();
+            
+            // 使用 Big.js 進行精確計算
+            const currentBalance = allBillings.reduce((sum, item) => {
+                return sum.plus(new Big(item.getDataValue('amount')));
+            }, new Big(0));
+
+            console.log('當前餘額:', currentBalance.toString(), '儲值金額:', amount);
+
+            // 如果餘額不足，返回錯誤
+            if (currentBalance.lt(new Big(amount))) {
+                return responseHandler.badRequest(res, '餘額不足，請先儲值');
+            }
+
             const result = await mobimatterService.topUpESim({
                 productId,
                 addOnOrderIdentifier: order.orderNumber
@@ -146,25 +161,29 @@ const esimController = {
                         productId: productId,
                         CustomerId: order.CustomerId
                     });
+                    
+                    // 修改回傳結果，使用資料庫的 id（像 purchaseESim 的做法）
+                    result.result.orderId = topupOrder.id;
                 } catch (error) {
                     console.error('儲值訂單創建失敗:', error);
+                    console.error('錯誤詳情:', {
+                        message: error.message,
+                        stack: error.stack,
+                        orderData: {
+                            orderNumber: result.result.orderId,
+                            type: 'esim_addon',
+                            status: 'pending',
+                            amount: amount,
+                            productId: productId,
+                            CustomerId: order.CustomerId
+                        }
+                    });
                 }
+            } else {
+                console.log('儲值訂單創建條件不滿足，跳過創建');
             }
 
-            // 寫入 Billings（總帳）
-            if (order && order.CustomerId) {
-                await Billing.create({
-                    customerId: order.CustomerId,
-                    date: new Date(),
-                    type: 'topup',
-                    amount: -amount,
-                    description: `Topup Order ID ${order.id}`,
-                    status: '已完成',
-                    reference: order.id
-                });
-            }
-
-            return responseHandler.success(res, result, 'eSIM 儲值成功');
+            return responseHandler.success(res, result, 'eSIM 訂單創建成功');
         } catch (error) {
             return responseHandler.error(res, error.message || 'eSIM 儲值失敗', error.status || 500, error);
         }
@@ -266,37 +285,43 @@ const esimController = {
                 const order = await Order.findOne({ where: { orderNumber: orderId } });
                 // 取得 userId
                 const userId = order ? order.CustomerId : null;
-                // 取得 eSIM 資訊（解析 lineItemDetails）
-                const esimData = result.result || {};
-                const lineItem = esimData.orderLineItem || {};
-                const details = Array.isArray(lineItem.lineItemDetails) ? lineItem.lineItemDetails : [];
-                const getDetail = (name) => {
-                  const found = details.find(d => d.name === name);
-                  return found ? found.value : null;
-                };
-                const iccid = getDetail('ICCID');
-                const qrcode = getDetail('QR_CODE');
-                const expiredAt = null; // 若未來有有效期欄位可補上
-                if (userId && iccid) {
-                  await Card.create({
-                    customerId: userId,
-                    orderId: order ? order.id : null,
-                    iccid,
-                    purchasedAt: order ? order.createdAt : new Date(),
-                    expiredAt,
-                    qrcode,
-                    esimInfo: lineItem
-                  });
+                
+                // 只有 esim_realtime 訂單才需要創建 Card 記錄
+                if (order && order.type === 'esim_realtime') {
+                    // 取得 eSIM 資訊（解析 lineItemDetails）
+                    const esimData = result.result || {};
+                    const lineItem = esimData.orderLineItem || {};
+                    const details = Array.isArray(lineItem.lineItemDetails) ? lineItem.lineItemDetails : [];
+                    const getDetail = (name) => {
+                      const found = details.find(d => d.name === name);
+                      return found ? found.value : null;
+                    };
+                    const iccid = getDetail('ICCID');
+                    const qrcode = getDetail('QR_CODE');
+                    const expiredAt = null; // 若未來有有效期欄位可補上
+                    if (userId && iccid) {
+                      await Card.create({
+                        customerId: userId,
+                        orderId: order ? order.id : null,
+                        iccid,
+                        purchasedAt: order ? order.createdAt : new Date(),
+                        expiredAt,
+                        qrcode,
+                        esimInfo: lineItem
+                      });
+                    }
                 }
 
                 // 寫入 Billings（總帳）
                 if (order && userId) {
+                  // 根據訂單類型決定帳務記錄類型
+                  const billingType = order.type === 'esim_addon' ? 'topup' : 'purchase';
                   await Billing.create({
                     customerId: userId,
                     date: new Date(),
-                    type: 'purchase',
+                    type: billingType,
                     amount: -order.amount,
-                    description: `Order ID ${order.id}`,
+                    description: `${billingType === 'topup' ? 'Topup' : 'Order'} ID ${order.id}`,
                     status: '已完成',
                     reference: order.id
                   });

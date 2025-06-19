@@ -3,6 +3,7 @@ const { Sequelize } = require('sequelize')
 const sequelize = require('../db')
 const responseHandler = require('../utils/responseHandler')
 const Big = require('big.js')
+const dayjs = require('dayjs')
 
 const userController = {
   // 獲取所有用戶
@@ -17,7 +18,8 @@ const userController = {
         ],
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(*) FROM Orders WHERE Orders.CustomerId = Customer.id)'), 'orderCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM Orders WHERE Orders.CustomerId = Customer.id)'), 'orderCount'],
+            [sequelize.literal('(SELECT COALESCE(SUM(amount), 0) FROM Orders WHERE Orders.CustomerId = Customer.id)'), 'totalSpent']
           ]
         },
         group: ['Customer.id', 'Group.id', 'Group.name']
@@ -29,6 +31,7 @@ const userController = {
         email: user.email,
         group: user.Group.name,
         orderCount: parseInt(user.getDataValue('orderCount')),
+        totalSpent: parseFloat(user.getDataValue('totalSpent')),
         note: user.note
       }))
 
@@ -215,6 +218,7 @@ const userController = {
         email: user.email,
         group: user.Group.name,
         orderCount: parseInt(orderStats[0]?.getDataValue('totalOrders') || 0),
+        totalSpent: parseFloat(orderStats[0]?.getDataValue('totalAmount') || 0),
         note: user.note,
         orders: formattedOrders
       }

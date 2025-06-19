@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Billing = sequelize.define('Billing', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     date: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
-    type: { type: DataTypes.ENUM('purchase', 'deposit'), allowNull: false },
+    type: { type: DataTypes.ENUM('purchase', 'deposit', 'topup'), allowNull: false },
     amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     description: { type: DataTypes.STRING, allowNull: true },
     status: { type: DataTypes.STRING, defaultValue: '已完成' },

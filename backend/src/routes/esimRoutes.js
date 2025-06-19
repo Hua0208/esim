@@ -88,8 +88,8 @@ router.post(
  *               - orderId
  *             properties:
  *               orderId:
- *                 type: string
- *                 description: 訂單 ID
+ *                 type: integer
+ *                 description: 資料庫中的訂單 ID
  *     responses:
  *       200:
  *         description: 訂單完成
@@ -100,7 +100,7 @@ router.post(
  */
 router.post('/complete',
     [
-        body('orderId').isString().notEmpty(),
+        body('orderId').isInt({ min: 1 }).withMessage('訂單 ID 必須大於 0'),
         validate
     ],
     asyncHandler(async (req, res) => {

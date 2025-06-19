@@ -15,6 +15,7 @@ interface User {
   email: string
   group: string
   orderCount: number
+  totalSpent: number
   note: string
 }
 
@@ -154,7 +155,7 @@ const handleUpdateNote = async () => {
 
 // 查看訂單
 const handleViewOrders = (user: User) => {
-  navigateTo(`/customer/user/${user.id}`)
+  navigateTo(`/customer/detail/${user.id}`)
 }
 
 // 編輯備註

@@ -24,7 +24,7 @@ defineProps<{
           variant="text"
           color="primary"
           class="me-4"
-          @click="navigateTo('/customer/user')"
+          @click="navigateTo('/customer/detail')"
         >
           <VIcon icon="tabler-arrow-left" />
         </VBtn>
