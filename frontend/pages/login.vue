@@ -9,6 +9,7 @@ import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
 import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import { useRoute } from 'vue-router'
 
 const { signIn, data: sessionData } = useAuth()
 
@@ -38,6 +39,19 @@ const credentials = ref({
 
 const rememberMe = ref(false)
 
+const errorMsg = computed(() => {
+  switch (route.query.error) {
+    case 'CredentialsSignin':
+      return '帳號或密碼錯誤'
+    case 'AccessDenied':
+      return '權限不足'
+    case 'default':
+      return '登入失敗，請再試一次'
+    default:
+      return ''
+  }
+})
+
 async function login() {
   const response = await signIn('credentials', {
     callbackUrl: '/',
@@ -47,10 +61,22 @@ async function login() {
 
   // If error is not null => Error is occurred
   if (response && response.error) {
-    const apiStringifiedError = response.error
-    const apiError: NuxtError = JSON.parse(apiStringifiedError)
 
-    errors.value = apiError.data as Record<string, string | undefined>
+    try {
+      const parsedError = JSON.parse(response.error)
+      // 自動對應 message 到欄位
+      if (parsedError.message) {
+        errors.value = {
+          username: parsedError.message,
+          //password: parsedError.message,
+        }
+      } else {
+        errors.value = parsedError
+      }
+    } catch (e) {
+      errors.value = {}
+    }
+    
 
     // If err => Don't execute further
     return
@@ -84,6 +110,7 @@ const onSubmit = () => {
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
+      <VAlert v-if="errorMsg" type="error" class="mb-4">{{ errorMsg }}</VAlert>
       <!-- 👉 Top shape -->
       <VNodeRenderer
         :nodes="h('div', { innerHTML: authV1TopShape })"

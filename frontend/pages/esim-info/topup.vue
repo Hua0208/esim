@@ -76,6 +76,16 @@ function countryName(code: string) {
   const name = t('CountryNames.' + code)
   return name === 'CountryNames.' + code ? code : name
 }
+
+const expandedCards = ref<Set<number>>(new Set())
+
+const toggleCard = (productId: number) => {
+  if (expandedCards.value.has(productId)) {
+    expandedCards.value.delete(productId)
+  } else {
+    expandedCards.value.add(productId)
+  }
+}
 </script>
 
 <template>
@@ -118,26 +128,38 @@ function countryName(code: string) {
                     />
                     <h3 class="text-h5 mb-0">{{ product.name }}</h3>
                   </div>
-                  
                   <p class="mb-2">
+                      <strong>{{ t('Price') }}：</strong>{{ product.Details.retailPrice }} {{ product.Details.currencyCode }}
+                    </p>
+                  <!-- <p class="mb-2">
                     <strong>{{ t('ProductId') }}：</strong>{{ product.productId }}
-                  </p>
+                  </p> -->
                   <p class="mb-2">
                     <strong>{{ t('Status') }}：</strong>{{ product.enabled ? t('Enabled') : t('Disabled') }}
                   </p>
                   <template v-if="product.Details">
+                    
                     <p class="mb-2">
                       <strong>{{ t('Provider') }}：</strong>{{ product.Details.providerName }}
-                    </p>
-                    <p class="mb-2">
-                      <strong>{{ t('Price') }}：</strong>{{ product.Details.retailPrice }} {{ product.Details.currencyCode }}
                     </p>
                     <p class="mb-2">
                       <strong>{{ t('Region') }}：</strong>{{ product.Details.regions?.join(', ') }}
                     </p>
                     <p class="mb-2">
-                      <strong>{{ t('Country') }}：</strong>{{ product.Details.countries?.map(code => countryName(code)).join(', ') }}
-                    </p>
+                      <strong>{{ t('Country') }}：</strong>
+                      <VBtn
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        class="ml-2"
+                        @click="toggleCard(product.id)"
+                      >
+                        {{ expandedCards.has(product.id) ? t('Collapse') : t('Expand') }}
+                        ({{ product.Details.countries?.length || 0 }})
+                      </VBtn>
+                      <div v-show="expandedCards.has(product.id)" class="mt-2">
+                        {{ product.Details.countries?.map(code => countryName(code)).join(', ') }}
+                      </div>                    </p>
                     <p class="mb-2">
                       <strong>{{ t('DataLimit') }}：</strong>{{ product.Details.productDetails?.PLAN_DATA_LIMIT }} {{ product.Details.productDetails?.PLAN_DATA_UNIT }}
                     </p>

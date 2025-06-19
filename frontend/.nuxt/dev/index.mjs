@@ -1,42 +1,42 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseStatus, setResponseHeader, send, getRequestHeaders, getRequestURL, getResponseHeader, setResponseHeaders, getResponseStatus, createError, getHeaders, parseCookies, getQuery as getQuery$1, isMethod, readBody, setCookie, getRequestHost, getRequestProtocol, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, getResponseStatusText } from 'file:///Users/hua/Documents/esim/frontend/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseStatus, setResponseHeader, send, getRequestHeaders, getRequestURL, getResponseHeader, setResponseHeaders, getResponseStatus, createError, getHeaders, parseCookies, getQuery as getQuery$1, isMethod, readBody, setCookie, getRequestHost, getRequestProtocol, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, getResponseStatusText } from 'file:///Users/hua/Documents/esim/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import is from 'file:///Users/hua/Documents/esim/frontend/node_modules/@sindresorhus/is/distribution/index.js';
-import destr$2, { destr as destr$1 } from 'file:///Users/hua/Documents/esim/frontend/node_modules/destr/dist/index.mjs';
-import CredentialsProvider from 'file:///Users/hua/Documents/esim/frontend/node_modules/next-auth/providers/credentials.js';
-import { ensurePrefix } from 'file:///Users/hua/Documents/esim/frontend/node_modules/@antfu/utils/dist/index.mjs';
-import { AuthHandler } from 'file:///Users/hua/Documents/esim/frontend/node_modules/next-auth/core/index.js';
-import { getToken as getToken$1 } from 'file:///Users/hua/Documents/esim/frontend/node_modules/next-auth/jwt/index.js';
-import defu, { defuFn, defu as defu$1 } from 'file:///Users/hua/Documents/esim/frontend/node_modules/defu/dist/defu.mjs';
-import { getRequestDependencies, getPreloadLinks, getPrefetchLinks, createRenderer } from 'file:///Users/hua/Documents/esim/frontend/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { stringify, uneval } from 'file:///Users/hua/Documents/esim/frontend/node_modules/devalue/index.js';
-import { renderToString } from 'file:///Users/hua/Documents/esim/frontend/node_modules/vue/server-renderer/index.mjs';
-import { propsToString, renderSSRHead } from 'file:///Users/hua/Documents/esim/frontend/node_modules/@unhead/ssr/dist/index.mjs';
-import destr from 'file:///Users/hua/Documents/esim/frontend/node_modules/nitropack/node_modules/destr/dist/index.mjs';
-import { createHooks } from 'file:///Users/hua/Documents/esim/frontend/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file:///Users/hua/Documents/esim/frontend/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///Users/hua/Documents/esim/frontend/node_modules/node-mock-http/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file:///Users/hua/Documents/esim/frontend/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file:///Users/hua/Documents/esim/frontend/node_modules/unstorage/drivers/fs.mjs';
-import { digest } from 'file:///Users/hua/Documents/esim/frontend/node_modules/ohash/dist/index.mjs';
-import { klona } from 'file:///Users/hua/Documents/esim/frontend/node_modules/klona/dist/index.mjs';
-import { snakeCase } from 'file:///Users/hua/Documents/esim/frontend/node_modules/scule/dist/index.mjs';
-import { getContext } from 'file:///Users/hua/Documents/esim/frontend/node_modules/unctx/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file:///Users/hua/Documents/esim/frontend/node_modules/radix3/dist/index.mjs';
+import is from 'file:///Users/hua/Documents/esim/node_modules/@sindresorhus/is/distribution/index.js';
+import destr$2, { destr as destr$1 } from 'file:///Users/hua/Documents/esim/node_modules/destr/dist/index.mjs';
+import CredentialsProvider from 'file:///Users/hua/Documents/esim/node_modules/next-auth/providers/credentials.js';
+import { ensurePrefix } from 'file:///Users/hua/Documents/esim/node_modules/@antfu/utils/dist/index.mjs';
+import { AuthHandler } from 'file:///Users/hua/Documents/esim/node_modules/next-auth/core/index.js';
+import { getToken as getToken$1 } from 'file:///Users/hua/Documents/esim/node_modules/next-auth/jwt/index.js';
+import defu, { defuFn, defu as defu$1 } from 'file:///Users/hua/Documents/esim/node_modules/defu/dist/defu.mjs';
+import { getRequestDependencies, getPreloadLinks, getPrefetchLinks, createRenderer } from 'file:///Users/hua/Documents/esim/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { stringify, uneval } from 'file:///Users/hua/Documents/esim/node_modules/devalue/index.js';
+import { renderToString } from 'file:///Users/hua/Documents/esim/node_modules/vue/server-renderer/index.mjs';
+import { propsToString, renderSSRHead } from 'file:///Users/hua/Documents/esim/node_modules/@unhead/ssr/dist/index.mjs';
+import destr from 'file:///Users/hua/Documents/esim/node_modules/nitropack/node_modules/destr/dist/index.mjs';
+import { createHooks } from 'file:///Users/hua/Documents/esim/node_modules/hookable/dist/index.mjs';
+import { createFetch, Headers as Headers$1 } from 'file:///Users/hua/Documents/esim/node_modules/ofetch/dist/node.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///Users/hua/Documents/esim/node_modules/node-mock-http/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file:///Users/hua/Documents/esim/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file:///Users/hua/Documents/esim/node_modules/unstorage/drivers/fs.mjs';
+import { digest } from 'file:///Users/hua/Documents/esim/node_modules/ohash/dist/index.mjs';
+import { klona } from 'file:///Users/hua/Documents/esim/node_modules/klona/dist/index.mjs';
+import { snakeCase } from 'file:///Users/hua/Documents/esim/node_modules/scule/dist/index.mjs';
+import { getContext } from 'file:///Users/hua/Documents/esim/node_modules/unctx/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file:///Users/hua/Documents/esim/node_modules/radix3/dist/index.mjs';
 import { readFile } from 'node:fs/promises';
-import consola, { consola as consola$1 } from 'file:///Users/hua/Documents/esim/frontend/node_modules/consola/dist/index.mjs';
-import { ErrorParser } from 'file:///Users/hua/Documents/esim/frontend/node_modules/youch-core/build/index.js';
-import { Youch } from 'file:///Users/hua/Documents/esim/frontend/node_modules/youch/build/index.js';
-import { SourceMapConsumer } from 'file:///Users/hua/Documents/esim/frontend/node_modules/nitropack/node_modules/source-map/source-map.js';
+import consola, { consola as consola$1 } from 'file:///Users/hua/Documents/esim/node_modules/consola/dist/index.mjs';
+import { ErrorParser } from 'file:///Users/hua/Documents/esim/node_modules/youch-core/build/index.js';
+import { Youch } from 'file:///Users/hua/Documents/esim/node_modules/youch/build/index.js';
+import { SourceMapConsumer } from 'file:///Users/hua/Documents/esim/node_modules/nitropack/node_modules/source-map/source-map.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { captureRawStackTrace, parseRawStackTrace } from 'file:///Users/hua/Documents/esim/frontend/node_modules/errx/dist/index.js';
-import { isVNode, unref, version } from 'file:///Users/hua/Documents/esim/frontend/node_modules/vue/index.mjs';
-import getURL from 'file:///Users/hua/Documents/esim/frontend/node_modules/requrl/dist/requrl.js';
-import { createServerHead as createServerHead$1, CapoPlugin } from 'file:///Users/hua/Documents/esim/frontend/node_modules/unhead/dist/index.mjs';
-import { defineHeadPlugin } from 'file:///Users/hua/Documents/esim/frontend/node_modules/@unhead/shared/dist/index.mjs';
+import { captureRawStackTrace, parseRawStackTrace } from 'file:///Users/hua/Documents/esim/node_modules/errx/dist/index.js';
+import { isVNode, unref, version } from 'file:///Users/hua/Documents/esim/node_modules/vue/index.mjs';
+import getURL from 'file:///Users/hua/Documents/esim/node_modules/requrl/dist/requrl.js';
+import { createServerHead as createServerHead$1, CapoPlugin } from 'file:///Users/hua/Documents/esim/node_modules/unhead/dist/index.mjs';
+import { defineHeadPlugin } from 'file:///Users/hua/Documents/esim/node_modules/@unhead/shared/dist/index.mjs';
 
 const HASH_RE = /#/g;
 const AMPERSAND_RE = /&/g;
@@ -1349,7 +1349,7 @@ if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
 window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
 `;
 
-const _KxTA3wejDOH6YwHSNC3e7UPi41TErpDP6zYZw3fa6bg = (function(nitro) {
+const _yXQqbt6Ivqi2vzpkKMQy5KByOjeqHh1O14C_TxbZMnM = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script}<\/script>`);
   });
@@ -1357,7 +1357,7 @@ const _KxTA3wejDOH6YwHSNC3e7UPi41TErpDP6zYZw3fa6bg = (function(nitro) {
 
 const rootDir = "/Users/hua/Documents/esim/frontend";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"}],"style":[],"script":[],"noscript":[],"titleTemplate":"%s - NuxtJS Admin Template","title":"Vuexys"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"}],"style":[],"script":[],"noscript":[],"titleTemplate":"%s - Esim Management","title":"Esim"};
 
 const appRootTag = "div";
 
@@ -1374,7 +1374,7 @@ const devReducers = {
   URL: (data) => data instanceof URL ? data.toString() : void 0
 };
 const asyncContext = getContext("nuxt-dev", { asyncContext: true, AsyncLocalStorage });
-const _y12elCRjLnLsaW_naf38s7y9qbvds2_YZD7biwoZVUk = (nitroApp) => {
+const _BD83VmNfH3drshHDFg8O0vADCGhNPfe5hc_i_jIRzqo = (nitroApp) => {
   const handler = nitroApp.h3App.handler;
   nitroApp.h3App.handler = (event) => {
     return asyncContext.callAsync({ logs: [], event }, () => handler(event));
@@ -1802,7 +1802,7 @@ function getServerOrigin(event) {
 function defineNitroPlugin(def) {
   return def;
 }
-const _kjsK53mMVKDZ6LW4QzPeaGkoEUKPaNanyiV6VQnJSw = defineNitroPlugin(() => {
+const _YHm5z3kLvndN4qCRju740Yd9T4lGJ5Hwg_zORpAdg = defineNitroPlugin(() => {
   try {
     getServerOrigin();
   } catch (error) {
@@ -1819,9 +1819,9 @@ const _YNTx2Nryg30kOxD14XhqJy1pIpVBCrlFsrLoJEA0Q = defineNitroPlugin$1((nitroApp
 });
 
 const plugins = [
-  _KxTA3wejDOH6YwHSNC3e7UPi41TErpDP6zYZw3fa6bg,
-_y12elCRjLnLsaW_naf38s7y9qbvds2_YZD7biwoZVUk,
-_kjsK53mMVKDZ6LW4QzPeaGkoEUKPaNanyiV6VQnJSw,
+  _yXQqbt6Ivqi2vzpkKMQy5KByOjeqHh1O14C_TxbZMnM,
+_BD83VmNfH3drshHDFg8O0vADCGhNPfe5hc_i_jIRzqo,
+_YHm5z3kLvndN4qCRju740Yd9T4lGJ5Hwg_zORpAdg,
 _YNTx2Nryg30kOxD14XhqJy1pIpVBCrlFsrLoJEA0Q
 ];
 
@@ -1877,7 +1877,7 @@ const _lazy_NDClIW = () => Promise.resolve().then(function () { return index_get
 const _lazy_2Cq09P = () => Promise.resolve().then(function () { return header_get$1; });
 const _lazy_s9lI03 = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_H_bVoQ = () => Promise.resolve().then(function () { return token_get$1; });
-const _lazy_FX_rfr = () => Promise.resolve().then(function () { return renderer$1; });
+const _lazy_wdLYoz = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '/api/app-bar/search', handler: _lazy_OyF2_o, lazy: true, middleware: false, method: undefined },
@@ -1932,8 +1932,8 @@ const handlers = [
   { route: '/api/pages/profile/header', handler: _lazy_2Cq09P, lazy: true, middleware: false, method: "get" },
   { route: '/api/pages/profile', handler: _lazy_s9lI03, lazy: true, middleware: false, method: "get" },
   { route: '/api/token', handler: _lazy_H_bVoQ, lazy: true, middleware: false, method: "get" },
-  { route: '/__nuxt_error', handler: _lazy_FX_rfr, lazy: true, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_FX_rfr, lazy: true, middleware: false, method: undefined }
+  { route: '/__nuxt_error', handler: _lazy_wdLYoz, lazy: true, middleware: false, method: undefined },
+  { route: '/**', handler: _lazy_wdLYoz, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
@@ -14370,9 +14370,9 @@ const login_post = defineEventHandler(async (event) => {
   if (!email || !password) {
     throw createError({
       statusCode: 403,
-      statusMessage: "Email and Password is required to login",
+      statusMessage: "Username and Password is required to login",
       data: {
-        email: ["Email and Password is required to login"]
+        username: ["Username and Password is required to login"]
       }
     });
   }
@@ -14380,9 +14380,9 @@ const login_post = defineEventHandler(async (event) => {
   if (!dbUser) {
     throw createError({
       statusCode: 403,
-      statusMessage: "Invalid email or password",
+      statusMessage: "Invalid username or password",
       data: {
-        email: ["Invalid email or password"]
+        username: ["Invalid username or password"]
       }
     });
   }

@@ -49,23 +49,46 @@ const esimController = {
                 productCategory: 'esim_realtime',
                 customerId
             });
-
+            console.log('mobimatterService result:', JSON.stringify(result, null, 2));
+            
             // 新增本地訂單紀錄
+            console.log('檢查訂單創建條件:');
+            console.log('- result:', !!result);
+            console.log('- result.result:', !!result?.result);
+            console.log('- result.result.orderId:', result?.result?.orderId);
+            console.log('- customerId:', customerId);
+            
             if (result && result.result && result.result.orderId && customerId) {
                 try {
+                    console.log('開始創建訂單...');
                     const order = await Order.create({
                         orderNumber: result.result.orderId,
                         type: 'esim_realtime',
                         status: 'pending',
                         amount: amount,
                         productId: productId,
-                        UserId: customerId
+                        CustomerId: customerId
                     });
+                    console.log('訂單創建成功，ID:', order.id);
                     // 修改回傳結果，使用資料庫的 id
                     result.result.orderId = order.id;
                 } catch (error) {
                     console.error('訂單創建失敗:', error);
+                    console.error('錯誤詳情:', {
+                        message: error.message,
+                        stack: error.stack,
+                        orderData: {
+                            orderNumber: result.result.orderId,
+                            type: 'esim_realtime',
+                            status: 'pending',
+                            amount: amount,
+                            productId: productId,
+                            CustomerId: customerId
+                        }
+                    });
                 }
+            } else {
+                console.log('訂單創建條件不滿足，跳過創建');
             }
             return responseHandler.success(res, result, 'eSIM 購買成功');
         } catch (error) {
@@ -121,7 +144,7 @@ const esimController = {
                         status: 'pending',
                         amount: amount,
                         productId: productId,
-                        UserId: order.UserId
+                        CustomerId: order.CustomerId
                     });
                 } catch (error) {
                     console.error('儲值訂單創建失敗:', error);
@@ -129,9 +152,9 @@ const esimController = {
             }
 
             // 寫入 Billings（總帳）
-            if (order && order.UserId) {
+            if (order && order.CustomerId) {
                 await Billing.create({
-                    userId: order.UserId,
+                    customerId: order.CustomerId,
                     date: new Date(),
                     type: 'topup',
                     amount: -amount,
@@ -242,7 +265,7 @@ const esimController = {
                 // 取得本地訂單資訊
                 const order = await Order.findOne({ where: { orderNumber: orderId } });
                 // 取得 userId
-                const userId = order ? order.UserId : null;
+                const userId = order ? order.CustomerId : null;
                 // 取得 eSIM 資訊（解析 lineItemDetails）
                 const esimData = result.result || {};
                 const lineItem = esimData.orderLineItem || {};
@@ -256,7 +279,7 @@ const esimController = {
                 const expiredAt = null; // 若未來有有效期欄位可補上
                 if (userId && iccid) {
                   await Card.create({
-                    userId,
+                    customerId: userId,
                     orderId: order ? order.id : null,
                     iccid,
                     purchasedAt: order ? order.createdAt : new Date(),
@@ -269,7 +292,7 @@ const esimController = {
                 // 寫入 Billings（總帳）
                 if (order && userId) {
                   await Billing.create({
-                    userId,
+                    customerId: userId,
                     date: new Date(),
                     type: 'purchase',
                     amount: -order.amount,

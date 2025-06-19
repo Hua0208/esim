@@ -169,7 +169,7 @@ const handleEditGroup = (group: Group) => {
               >
                 <VIcon icon="tabler-edit" />
               </VBtn>
-              <VBtn
+              <!-- <VBtn
                 icon
                 variant="text"
                 color="error"
@@ -177,7 +177,7 @@ const handleEditGroup = (group: Group) => {
                 @click="handleDeleteGroup(item.id)"
               >
                 <VIcon icon="tabler-trash" />
-              </VBtn>
+              </VBtn> -->
             </template>
 
             <template #no-data>

@@ -1,2 +1,2 @@
-import { DefaultRefreshHandler } from '/Users/hua/Documents/esim/frontend/node_modules/@sidebase/nuxt-auth/dist/runtime/utils/refreshHandler'
+import { DefaultRefreshHandler } from '/Users/hua/Documents/esim/node_modules/@sidebase/nuxt-auth/dist/runtime/utils/refreshHandler'
 export const _refreshHandler = new DefaultRefreshHandler({"enablePeriodically":false,"enableOnWindowFocus":true})

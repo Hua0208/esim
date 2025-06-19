@@ -1,4 +1,4 @@
-const { Billing, User } = require('../models');
+const { Billing, Customer } = require('../models');
 const Big = require('big.js');
 const responseHandler = require('../utils/responseHandler');
 
@@ -6,11 +6,11 @@ const billingController = {
   getCenter: async (req, res) => {
     try {
       // 支援查詢條件
-      const { page = 1, pageSize = 20, userId, type, dateFrom, dateTo } = req.query;
+      const { page = 1, pageSize = 20, customerId, type, dateFrom, dateTo } = req.query;
       const offset = (page - 1) * pageSize;
       const where = {};
 
-      if (userId) where.userId = userId;
+      if (customerId) where.customerId = customerId;
       if (type) where.type = type;
       if (dateFrom || dateTo) {
         where.date = {};
@@ -20,7 +20,7 @@ const billingController = {
 
       const { count, rows } = await Billing.findAndCountAll({
         where,
-        include: [{ model: User, attributes: ['id', 'name', 'email'] }],
+        include: [{ model: Customer, as: 'Customer', attributes: ['id', 'name', 'email'] }],
         order: [['date', 'DESC']],
         offset,
         limit: parseInt(pageSize)

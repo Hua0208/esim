@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const auth = require('../middleware/auth');
 
 /**
  * @swagger
@@ -67,6 +68,28 @@ const authController = require('../controllers/authController');
  *         accessToken:
  *           type: string
  *           description: JWT 訪問令牌
+ *     LoginAttemptInfo:
+ *       type: object
+ *       properties:
+ *         currentAttempts:
+ *           type: integer
+ *           description: 當前登入失敗次數
+ *         maxAttempts:
+ *           type: integer
+ *           description: 最大允許嘗試次數
+ *         remainingAttempts:
+ *           type: integer
+ *           description: 剩餘嘗試次數
+ *         isLocked:
+ *           type: boolean
+ *           description: 是否被鎖定
+ *         remainingLockTime:
+ *           type: integer
+ *           description: 剩餘鎖定時間（分鐘）
+ *         lockedUntil:
+ *           type: string
+ *           format: date-time
+ *           description: 鎖定結束時間
  */
 
 /**
@@ -94,6 +117,82 @@ const authController = require('../controllers/authController');
  *         description: 伺服器錯誤
  */
 router.post('/login', authController.login);
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: 獲取用戶資料
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 成功獲取用戶資料
+ *       401:
+ *         description: 未授權
+ *       404:
+ *         description: 用戶不存在
+ */
+router.get('/profile', auth, authController.getProfile);
+
+/**
+ * @swagger
+ * /api/auth/login-attempts/{userId}:
+ *   get:
+ *     summary: 獲取用戶登入嘗試次數資訊（管理員專用）
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: 用戶 ID
+ *     responses:
+ *       200:
+ *         description: 成功獲取登入嘗試次數資訊
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginAttemptInfo'
+ *       401:
+ *         description: 未授權
+ *       403:
+ *         description: 權限不足
+ *       404:
+ *         description: 用戶不存在
+ */
+router.get('/login-attempts/:userId', auth, authController.getLoginAttemptInfo);
+
+/**
+ * @swagger
+ * /api/auth/unlock/{userId}:
+ *   post:
+ *     summary: 手動解鎖用戶帳號（管理員專用）
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: 用戶 ID
+ *     responses:
+ *       200:
+ *         description: 成功解鎖用戶帳號
+ *       401:
+ *         description: 未授權
+ *       403:
+ *         description: 權限不足
+ *       404:
+ *         description: 用戶不存在
+ */
+router.post('/unlock/:userId', auth, authController.unlockUser);
 
 /**
  * @swagger

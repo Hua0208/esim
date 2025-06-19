@@ -6,9 +6,9 @@ export default defineEventHandler(async event => {
   if (!email || !password) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Email and Password is required to login',
+      statusMessage: 'Username and Password is required to login',
       data: {
-        email: ['Email and Password is required to login'],
+        username: ['Username and Password is required to login'],
       },
     })
   }
@@ -18,9 +18,9 @@ export default defineEventHandler(async event => {
   if (!dbUser) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Invalid email or password',
+      statusMessage: 'Invalid username or password',
       data: {
-        email: ['Invalid email or password'],
+        username: ['Invalid username or password'],
       },
     })
   }

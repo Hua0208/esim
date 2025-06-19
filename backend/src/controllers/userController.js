@@ -1,4 +1,4 @@
-const { User, Group, Order, Product, Card } = require('../models')
+const { Customer, Group, Order, Product, Card, ProductDetail } = require('../models')
 const { Sequelize } = require('sequelize')
 const sequelize = require('../db')
 const responseHandler = require('../utils/responseHandler')
@@ -8,24 +8,19 @@ const userController = {
   // 獲取所有用戶
   async getAllUsers(req, res) {
     try {
-      const users = await User.findAll({
+      const users = await Customer.findAll({
         include: [
           {
             model: Group,
-            attributes: ['name']
-          },
-          {
-            model: Order,
-            attributes: [],
-            where: { status: 'completed' }
+            attributes: ['id', 'name']
           }
         ],
         attributes: {
           include: [
-            [Sequelize.fn('COUNT', Sequelize.col('Orders.id')), 'orderCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM Orders WHERE Orders.CustomerId = Customer.id)'), 'orderCount']
           ]
         },
-        group: ['User.id', 'Group.id', 'Group.name']
+        group: ['Customer.id', 'Group.id', 'Group.name']
       })
 
       const formattedUsers = users.map(user => ({
@@ -44,16 +39,18 @@ const userController = {
     }
   },
 
-  // 創建新用戶
+  // 創建用戶
   async createUser(req, res) {
     try {
       const { name, email, groupId, note } = req.body
-      const user = await User.create({
+
+      const user = await Customer.create({
         name,
         email,
         GroupId: groupId,
         note
       })
+
       return responseHandler.success(res, user, '用戶創建成功', 201)
     } catch (error) {
       console.error('創建用戶失敗:', error)
@@ -66,8 +63,8 @@ const userController = {
     try {
       const { id } = req.params
       const { name, email, groupId, note } = req.body
-      const user = await User.findByPk(id)
-      
+
+      const user = await Customer.findByPk(id)
       if (!user) {
         return responseHandler.notFound(res, '用戶不存在')
       }
@@ -78,6 +75,7 @@ const userController = {
         GroupId: groupId,
         note
       })
+
       return responseHandler.success(res, user, '用戶更新成功')
     } catch (error) {
       console.error('更新用戶失敗:', error)
@@ -90,8 +88,8 @@ const userController = {
     try {
       const { id } = req.params
       const { note } = req.body
-      const user = await User.findByPk(id)
-      
+
+      const user = await Customer.findByPk(id)
       if (!user) {
         return responseHandler.notFound(res, '用戶不存在')
       }
@@ -108,28 +106,31 @@ const userController = {
   async getUserOrders(req, res) {
     try {
       const { id } = req.params
+
       const orders = await Order.findAll({
-        where: { UserId: id },
+        where: { CustomerId: id },
         include: [
           {
-            model: User,
-            attributes: ['name']
+            model: Customer,
+            attributes: ['id', 'name']
           },
           {
             model: Product,
-            attributes: ['name'],
-            required: false
+            attributes: ['productId', 'name', 'description']
           }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
 
       const formattedOrders = orders.map(order => ({
         id: order.id,
-        createdAt: order.createdAt,
+        orderNumber: order.orderNumber,
+        type: order.type,
         status: order.status,
         amount: order.amount,
-        productName: order.Product ? order.Product.name : null,
-        customerName: order.User.name
+        customerName: order.Customer.name,
+        productName: order.Product.name,
+        createdAt: order.createdAt
       }))
 
       return responseHandler.success(res, formattedOrders, '成功獲取用戶訂單')
@@ -139,7 +140,7 @@ const userController = {
     }
   },
 
-  // 獲取單個用戶詳情
+  // 獲取用戶詳情
   async getUserById(req, res) {
     try {
       const userId = parseInt(req.params.id)
@@ -147,42 +148,41 @@ const userController = {
         return responseHandler.badRequest(res, '無效的用戶 ID')
       }
 
-      const user = await User.findByPk(userId, {
-        include: [{
-          model: Group,
-          attributes: ['name']
-        }]
+      const user = await Customer.findByPk(userId, {
+        include: [
+          {
+            model: Group,
+            attributes: ['id', 'name']
+          }
+        ]
       })
 
       if (!user) {
         return responseHandler.notFound(res, '用戶不存在')
       }
 
-      // 獲取用戶的所有訂單（用於計算總金額）
-      const allOrders = await Order.findAll({
-        where: { userId },
-        attributes: ['id', 'amount', 'status']
+      // 獲取用戶的訂單統計
+      const orderStats = await Order.findAll({
+        where: { CustomerId: userId },
+        attributes: [
+          [sequelize.fn('COUNT', sequelize.col('id')), 'totalOrders'],
+          [sequelize.fn('SUM', sequelize.col('amount')), 'totalAmount']
+        ]
       })
 
-      // 計算累積消費（包含所有訂單）
-      const totalSpent = allOrders.reduce((sum, order) => {
-        if (order.status === 'completed') {
-          return sum.plus(new Big(order.amount))
-        }
-        return sum
-      }, new Big(0))
-
-      // 獲取用戶的購卡訂單列表（只顯示 esim_realtime）
+      // 獲取用戶的訂單列表
       const orders = await Order.findAll({
-        where: { 
-          userId,
-          type: 'esim_realtime'  // 只顯示購卡訂單
-        },
-        attributes: { exclude: ['orderNumber'] },
+        where: { CustomerId: userId },
         include: [
           {
             model: Product,
-            attributes: ['name', 'productId']
+            attributes: ['productId', 'name'],
+            include: [
+              {
+                model: ProductDetail,
+                attributes: ['providerName', 'providerLogo', 'retailPrice', 'currencyCode']
+              }
+            ]
           },
           {
             model: Card,
@@ -193,10 +193,30 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
 
+      const formattedOrders = orders.map(order => ({
+        id: order.id,
+        orderNumber: order.orderNumber,
+        createdAt: order.createdAt,
+        status: order.status,
+        amount: order.amount,
+        productId: order.Product?.productId || '',
+        Product: order.Product ? {
+          name: order.Product.name,
+          productId: order.Product.productId
+        } : null,
+        Card: order.Card ? {
+          iccid: order.Card.iccid
+        } : null
+      }))
+
       const userData = {
-        ...user.toJSON(),
-        orders,
-        totalSpent: totalSpent.toString()
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        group: user.Group.name,
+        orderCount: parseInt(orderStats[0]?.getDataValue('totalOrders') || 0),
+        note: user.note,
+        orders: formattedOrders
       }
 
       return responseHandler.success(res, userData, '成功獲取用戶詳情')

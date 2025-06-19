@@ -1,7 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const Billing = sequelize.define('Billing', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    userId: { type: DataTypes.INTEGER, allowNull: true },
     date: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     type: { type: DataTypes.ENUM('purchase', 'deposit'), allowNull: false },
     amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
@@ -13,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Billing.associate = function(models) {
-    Billing.belongsTo(models.User, { foreignKey: 'userId' });
+    Billing.belongsTo(models.Customer, { foreignKey: 'customerId', as: 'Customer' });
   };
 
   return Billing;

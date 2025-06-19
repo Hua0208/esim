@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Card = sequelize.define('Card', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    userId: { type: DataTypes.INTEGER, allowNull: false },
+    customerId: { type: DataTypes.INTEGER, allowNull: false },
     orderId: { type: DataTypes.INTEGER, allowNull: false },
     iccid: { type: DataTypes.STRING, allowNull: false, unique: true },
     purchasedAt: { type: DataTypes.DATE, allowNull: false },
@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Card.associate = function(models) {
-    Card.belongsTo(models.User, { foreignKey: 'userId' });
+    Card.belongsTo(models.Customer, { foreignKey: 'customerId' });
     Card.belongsTo(models.Order, { foreignKey: 'orderId' });
   };
 

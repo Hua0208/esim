@@ -12,6 +12,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@auth/core": "^0.39.1",
     "@casl/ability": "6.7.2",
     "@casl/vue": "2.2.2",
     "@floating-ui/dom": "1.6.8",

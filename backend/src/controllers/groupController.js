@@ -1,4 +1,4 @@
-const { Group, User } = require('../models')
+const { Group, Customer } = require('../models')
 const responseHandler = require('../utils/responseHandler')
 
 const groupController = {
@@ -7,7 +7,7 @@ const groupController = {
     try {
       const groups = await Group.findAll({
         include: [{
-          model: User,
+          model: Customer,
           attributes: ['id']
         }]
       })
@@ -16,7 +16,7 @@ const groupController = {
         id: group.id,
         name: group.name,
         description: group.description,
-        memberCount: group.Users.length
+        memberCount: group.Customers.length
       }))
 
       return responseHandler.success(res, groupsWithMemberCount, '成功獲取群組列表')
