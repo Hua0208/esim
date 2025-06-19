@@ -19,7 +19,7 @@ const userController = {
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Orders WHERE Orders.CustomerId = Customer.id)'), 'orderCount'],
-            [sequelize.literal('(SELECT COALESCE(SUM(amount), 0) FROM Orders WHERE Orders.CustomerId = Customer.id)'), 'totalSpent']
+            [sequelize.literal('(SELECT COALESCE(SUM(amount), 0) FROM Orders WHERE Orders.CustomerId = Customer.id AND Orders.status = \'completed\')'), 'totalSpent']
           ]
         },
         group: ['Customer.id', 'Group.id', 'Group.name']
@@ -173,6 +173,17 @@ const userController = {
         ]
       })
 
+      // 獲取用戶的已完成訂單統計（用於計算總花費）
+      const completedOrderStats = await Order.findAll({
+        where: { 
+          CustomerId: userId,
+          status: 'completed'
+        },
+        attributes: [
+          [sequelize.fn('SUM', sequelize.col('amount')), 'totalSpent']
+        ]
+      })
+
       // 獲取用戶的訂單列表
       const orders = await Order.findAll({
         where: { CustomerId: userId },
@@ -218,7 +229,7 @@ const userController = {
         email: user.email,
         group: user.Group.name,
         orderCount: parseInt(orderStats[0]?.getDataValue('totalOrders') || 0),
-        totalSpent: parseFloat(orderStats[0]?.getDataValue('totalAmount') || 0),
+        totalSpent: parseFloat(completedOrderStats[0]?.getDataValue('totalSpent') || 0),
         note: user.note,
         orders: formattedOrders
       }
