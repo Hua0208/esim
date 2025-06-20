@@ -5,6 +5,7 @@ const { body, param, query, validationResult } = require('express-validator');
 const asyncHandler = require('express-async-handler');
 const mobimatterService = require('../services/mobimatterService');
 const { Product, ProductDetail, Order } = require('../models');
+const auth = require('../middleware/auth');
 
 // 驗證中間件
 const validate = (req, res, next) => {
@@ -21,6 +22,8 @@ const validate = (req, res, next) => {
  *   post:
  *     summary: 購買 eSIM
  *     tags: [eSIM]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -64,6 +67,7 @@ const validate = (req, res, next) => {
  */
 router.post(
     '/',
+    auth,
     [
         body('productId').isString().notEmpty(),
         body('customerId').isInt({ min: 1 }).withMessage('客戶 ID 必須大於 0'),
@@ -78,6 +82,8 @@ router.post(
  *   post:
  *     summary: 完成訂單
  *     tags: [eSIM]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -99,6 +105,7 @@ router.post(
  *         description: 伺服器錯誤
  */
 router.post('/complete',
+    auth,
     [
         body('orderId').isInt({ min: 1 }).withMessage('訂單 ID 必須大於 0'),
         validate
@@ -124,6 +131,8 @@ router.post('/complete',
  *   get:
  *     summary: 根據 ICCID 查詢訂單
  *     tags: [eSIM]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: iccid
@@ -140,6 +149,7 @@ router.post('/complete',
  *         description: 伺服器錯誤
  */
 router.get('/order',
+    auth,
     [
         query('iccid').isString().notEmpty(),
         validate
@@ -153,6 +163,8 @@ router.get('/order',
  *   get:
  *     summary: 查詢 provider info
  *     tags: [eSIM]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: orderId
@@ -169,6 +181,7 @@ router.get('/order',
  *         description: 伺服器錯誤
  */
 router.get('/provider-info/:orderId',
+    auth,
     [
         param('orderId').isString().notEmpty(),
         validate
@@ -182,6 +195,8 @@ router.get('/provider-info/:orderId',
  *   post:
  *     summary: 加值 eSIM
  *     tags: [eSIM]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -209,6 +224,7 @@ router.get('/provider-info/:orderId',
  *         description: 伺服器錯誤
  */
 router.post('/topup',
+    auth,
     [
         body('productId').isString().notEmpty(),
         body('orderId').isInt({ min: 1 }).withMessage('訂單 ID 必須大於 0'),
@@ -223,6 +239,8 @@ router.post('/topup',
  *   get:
  *     summary: 查詢產品可用網路
  *     tags: [eSIM]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
@@ -239,6 +257,7 @@ router.post('/topup',
  *         description: 伺服器錯誤
  */
 router.get('/product-networks/:productId',
+    auth,
     [
         param('productId').isString().notEmpty(),
         validate

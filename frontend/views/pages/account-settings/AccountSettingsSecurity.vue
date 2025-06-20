@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import laptopGirl from '@images/illustrations/laptop-girl.png'
+import { useApi } from '@/composables/useApi'
 
 const isCurrentPasswordVisible = ref(false)
 const isNewPasswordVisible = ref(false)
@@ -8,12 +9,138 @@ const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 
+// 表單驗證狀態
+const formErrors = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+  general: ''
+})
+
+// 載入狀態
+const isLoading = ref(false)
+
+// 成功訊息
+const successMessage = ref('')
+
 const passwordRequirements = [
   '至少8個字元',
   '至少一個小寫字母',
   '至少一個數字, 符號, 或空白字元',
 ]
 
+// 密碼強度驗證
+const validatePassword = (password: string) => {
+  const errors = []
+  if (password.length < 8) errors.push('密碼至少需要8個字元')
+  if (!/[a-z]/.test(password)) errors.push('密碼需要包含至少一個小寫字母')
+  if (!/[0-9!@#$%^&*(),.?":{}|<> ]/.test(password)) errors.push('密碼需要包含至少一個數字、符號或空白字元')
+  return errors
+}
+
+// 表單驗證
+const validateForm = () => {
+  formErrors.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    general: ''
+  }
+
+  let isValid = true
+
+  // 驗證當前密碼
+  if (!currentPassword.value) {
+    formErrors.value.currentPassword = '請輸入當前密碼'
+    isValid = false
+  }
+
+  // 驗證新密碼
+  if (!newPassword.value) {
+    formErrors.value.newPassword = '請輸入新密碼'
+    isValid = false
+  } else {
+    const passwordErrors = validatePassword(newPassword.value)
+    if (passwordErrors.length > 0) {
+      formErrors.value.newPassword = passwordErrors.join(', ')
+      isValid = false
+    }
+  }
+
+  // 驗證確認密碼
+  if (!confirmPassword.value) {
+    formErrors.value.confirmPassword = '請確認新密碼'
+    isValid = false
+  } else if (newPassword.value !== confirmPassword.value) {
+    formErrors.value.confirmPassword = '確認密碼與新密碼不符'
+    isValid = false
+  }
+
+  return isValid
+}
+
+// 修改密碼
+const changePassword = async () => {
+  if (!validateForm()) return
+
+  isLoading.value = true
+  formErrors.value.general = ''
+  successMessage.value = ''
+
+  try {
+    const { data, error } = await useApi('/auth/change-password', {
+      method: 'POST',
+      body: {
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value
+      }
+    })
+
+    if (error.value) {
+      // 處理錯誤回應
+      const errorData = error.value.data
+      if (errorData && errorData.message) {
+        formErrors.value.general = errorData.message
+      } else {
+        formErrors.value.general = '修改密碼失敗，請再試一次'
+      }
+      return
+    }
+
+    // 成功
+    successMessage.value = '密碼修改成功！'
+    
+    // 清空表單
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+    
+    // 3秒後清除成功訊息
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+
+  } catch (err) {
+    console.error('修改密碼錯誤:', err)
+    formErrors.value.general = '修改密碼失敗，請再試一次'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 重置表單
+const resetForm = () => {
+  currentPassword.value = ''
+  newPassword.value = ''
+  confirmPassword.value = ''
+  formErrors.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    general: ''
+  }
+  successMessage.value = ''
+}
 
 const recentDevicesHeaders = [
   { title: 'BROWSER', key: 'browser' },
@@ -75,7 +202,29 @@ const isOneTimePasswordDialogVisible = ref(false)
     <!-- SECTION: Change Password -->
     <VCol cols="12">
       <VCard title="密碼修改">
-        <VForm>
+        <!-- 成功訊息 -->
+        <VAlert
+          v-if="successMessage"
+          type="success"
+          variant="tonal"
+          closable
+          class="ma-4"
+        >
+          {{ successMessage }}
+        </VAlert>
+
+        <!-- 一般錯誤訊息 -->
+        <VAlert
+          v-if="formErrors.general"
+          type="error"
+          variant="tonal"
+          closable
+          class="ma-4"
+        >
+          {{ formErrors.general }}
+        </VAlert>
+
+        <VForm @submit.prevent="changePassword">
           <VCardText class="pt-0">
             <!-- 👉 Current Password -->
             <VRow>
@@ -89,8 +238,9 @@ const isOneTimePasswordDialogVisible = ref(false)
                   :type="isCurrentPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isCurrentPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   label="舊密碼"
-                  autocomplete="on"
+                  autocomplete="current-password"
                   placeholder="············"
+                  :error-messages="formErrors.currentPassword"
                   @click:append-inner="isCurrentPasswordVisible = !isCurrentPasswordVisible"
                 />
               </VCol>
@@ -108,8 +258,9 @@ const isOneTimePasswordDialogVisible = ref(false)
                   :type="isNewPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isNewPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   label="新密碼"
-                  autocomplete="on"
+                  autocomplete="new-password"
                   placeholder="············"
+                  :error-messages="formErrors.newPassword"
                   @click:append-inner="isNewPasswordVisible = !isNewPasswordVisible"
                 />
               </VCol>
@@ -124,8 +275,9 @@ const isOneTimePasswordDialogVisible = ref(false)
                   :type="isConfirmPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   label="確認新密碼"
-                  autocomplete="on"
+                  autocomplete="new-password"
                   placeholder="············"
+                  :error-messages="formErrors.confirmPassword"
                   @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
                 />
               </VCol>
@@ -157,14 +309,22 @@ const isOneTimePasswordDialogVisible = ref(false)
 
           <!-- 👉 Action Buttons -->
           <VCardText class="d-flex flex-wrap gap-4">
-            <VBtn>Save changes</VBtn>
+            <VBtn
+              type="submit"
+              :loading="isLoading"
+              :disabled="isLoading"
+            >
+              {{ isLoading ? '修改中...' : '儲存變更' }}
+            </VBtn>
 
             <VBtn
-              type="reset"
+              type="button"
               color="secondary"
               variant="tonal"
+              :disabled="isLoading"
+              @click="resetForm"
             >
-              Reset
+              重置
             </VBtn>
           </VCardText>
         </VForm>
@@ -222,9 +382,7 @@ const isOneTimePasswordDialogVisible = ref(false)
               </div>
             </div>
           </template>
-          <!-- TODO Refactor this after vuetify provides proper solution for removing default footer -->
-          <template #bottom />
-        <!-- </VDataTable>
+        </VDataTable>
       </VCard>
     </VCol>
     <!-- !SECTION -->

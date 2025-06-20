@@ -20,7 +20,7 @@ export default NuxtAuthHandler({
       name: 'Credentials',
       credentials: {}, // 物件是必需的，但可以留空。
       async authorize(credentials: any) {
-        const { user } = await $fetch<any>(`${process.env.NUXT_PUBLIC_API_BASE_URL ?? '/api'}/auth/login`, {
+        const response = await $fetch<any>(`${process.env.NUXT_PUBLIC_API_BASE_URL ?? '/api'}/auth/login`, {
           method: 'POST',
           body: JSON.stringify(credentials),
         }).catch((err: NuxtError) => {
@@ -30,7 +30,15 @@ export default NuxtAuthHandler({
           })
         })
 
-        return user || null
+        // 返回包含 accessToken 的用戶資料
+        if (response.user && response.accessToken) {
+          return {
+            ...response.user,
+            accessToken: response.accessToken
+          }
+        }
+
+        return null
       },
     }),
   ],
@@ -49,6 +57,8 @@ export default NuxtAuthHandler({
         token.avatar = user.avatar
         token.abilityRules = user.abilityRules
         token.role = user.role
+        // 保存後端的 JWT token
+        token.backendToken = user.accessToken
       }
 
       return token
@@ -61,6 +71,8 @@ export default NuxtAuthHandler({
         session.user.avatar = token.avatar
         session.user.abilityRules = token.abilityRules
         session.user.role = token.role
+        // 將後端 JWT token 添加到 session
+        session.backendToken = token.backendToken
       }
 
       return session

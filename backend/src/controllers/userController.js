@@ -1,5 +1,5 @@
 const { Customer, Group, Order, Product, Card, ProductDetail } = require('../models')
-const { Sequelize } = require('sequelize')
+const { Sequelize, Op } = require('sequelize')
 const sequelize = require('../db')
 const responseHandler = require('../utils/responseHandler')
 const Big = require('big.js')
@@ -184,9 +184,16 @@ const userController = {
         ]
       })
 
-      // 獲取用戶的訂單列表
+      // 獲取用戶的訂單列表（排除 topup 且已完成的訂單）
       const orders = await Order.findAll({
-        where: { CustomerId: userId },
+        where: { 
+          CustomerId: userId,
+          // 排除類型為 esim_addon 且狀態為 completed 的訂單（即 topup 且已完成的訂單）
+          [Op.or]: [
+            { type: 'esim_realtime' },
+            { type: 'esim_addon', status: { [Op.ne]: 'completed' } }
+          ]
+        },
         include: [
           {
             model: Product,

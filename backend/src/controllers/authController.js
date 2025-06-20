@@ -57,7 +57,7 @@ const authController = {
             const token = jwt.sign(
                 { id: user.id, username: user.username, role: user.role },
                 process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '24h' }
+                { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
             );
 
             // 返回用戶資料（不包含密碼）
@@ -144,6 +144,58 @@ const authController = {
         } catch (error) {
             console.error('解鎖用戶帳號失敗:', error);
             return responseHandler.error(res, '解鎖用戶帳號失敗', 500, error.message);
+        }
+    },
+
+    // 修改密碼
+    changePassword: async (req, res) => {
+        try {
+            const { currentPassword, newPassword } = req.body;
+            const userId = req.user.id;
+
+            // 驗證輸入
+            if (!currentPassword || !newPassword) {
+                return responseHandler.badRequest(res, '請提供當前密碼和新密碼');
+            }
+
+            // 密碼強度驗證
+            if (newPassword.length < 8) {
+                return responseHandler.badRequest(res, '新密碼至少需要8個字元');
+            }
+
+            // 查找用戶
+            const user = await User.findByPk(userId);
+            if (!user) {
+                return responseHandler.notFound(res, '用戶不存在');
+            }
+
+            // 驗證當前密碼
+            const isValidCurrentPassword = await bcrypt.compare(currentPassword, user.password);
+            if (!isValidCurrentPassword) {
+                return responseHandler.unauthorized(res, '當前密碼錯誤');
+            }
+
+            // 檢查新密碼是否與當前密碼相同
+            const isSamePassword = await bcrypt.compare(newPassword, user.password);
+            if (isSamePassword) {
+                return responseHandler.badRequest(res, '新密碼不能與當前密碼相同');
+            }
+
+            // 加密新密碼
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+            // 更新密碼
+            await user.update({
+                password: hashedNewPassword
+            });
+
+            // 重置登入嘗試次數（防止因為密碼修改導致的鎖定）
+            await loginAttemptService.resetLoginAttempts(user);
+
+            return responseHandler.success(res, null, '密碼修改成功');
+        } catch (error) {
+            console.error('修改密碼失敗:', error);
+            return responseHandler.error(res, '修改密碼失敗', 500, error.message);
         }
     },
 

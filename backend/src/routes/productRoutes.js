@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
+const auth = require('../middleware/auth');
 
 /**
  * @swagger
@@ -15,6 +16,8 @@ const productController = require('../controllers/productController');
  *   get:
  *     summary: 取得所有產品
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: productCategory
@@ -33,7 +36,7 @@ const productController = require('../controllers/productController');
  *       500:
  *         description: 伺服器錯誤
  */
-router.get('/', productController.getAllProducts);
+router.get('/', auth, productController.getAllProducts);
 
 /**
  * @swagger
@@ -41,6 +44,8 @@ router.get('/', productController.getAllProducts);
  *   post:
  *     summary: 新增產品
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -57,7 +62,7 @@ router.get('/', productController.getAllProducts);
  *       500:
  *         description: 伺服器錯誤
  */
-router.post('/', productController.createProduct);
+router.post('/', auth, productController.createProduct);
 
 /**
  * @swagger
@@ -65,6 +70,8 @@ router.post('/', productController.createProduct);
  *   put:
  *     summary: 更新產品詳細資訊
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -84,7 +91,7 @@ router.post('/', productController.createProduct);
  *       500:
  *         description: 伺服器錯誤
  */
-router.put('/:id/details', productController.updateProductDetails);
+router.put('/:id/details', auth, productController.updateProductDetails);
 
 /**
  * @swagger
@@ -92,6 +99,8 @@ router.put('/:id/details', productController.updateProductDetails);
  *   delete:
  *     summary: 刪除產品
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -107,7 +116,7 @@ router.put('/:id/details', productController.updateProductDetails);
  *       500:
  *         description: 伺服器錯誤
  */
-router.delete('/:id', productController.deleteProduct);
+router.delete('/:id', auth, productController.deleteProduct);
 
 /**
  * @swagger

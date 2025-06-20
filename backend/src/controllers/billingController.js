@@ -27,7 +27,10 @@ const billingController = {
       });
 
       // 彙整統計（全站或篩選後）
-      const all = await Billing.findAll({ where });
+      const all = await Billing.findAll({ 
+        where,
+        include: [{ model: Customer, as: 'Customer', attributes: ['id', 'name', 'email'] }]
+      });
       
       // 使用 Big.js 進行精確計算
       const currentBalance = all.reduce((sum, item) => {
@@ -41,16 +44,31 @@ const billingController = {
       let buyCount = 0, depositCount = 0;
       let totalSpent = new Big(0);
       
+      console.log('當月統計開始:', { thisYear, thisMonth, totalRecords: all.length });
+      
       all.forEach(item => {
         const d = new Date(item.date);
-        if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) {
+        const itemMonth = d.getMonth();
+        const itemYear = d.getFullYear();
+        
+        if (itemYear === thisYear && itemMonth === thisMonth) {
+          console.log('符合當月條件:', { 
+            type: item.type, 
+            amount: item.amount, 
+            date: item.date,
+            itemYear,
+            itemMonth
+          });
+          
           if (item.type === 'purchase') buyCount++;
-          if (item.type === 'deposit') depositCount++;
+          if (item.type === 'topup') depositCount++;
           if (item.amount < 0) {
             totalSpent = totalSpent.plus(new Big(item.getDataValue('amount')).abs());
           }
         }
       });
+      
+      console.log('當月統計結果:', { buyCount, depositCount, totalSpent: totalSpent.toString() });
 
       const responseData = {
         items: rows,

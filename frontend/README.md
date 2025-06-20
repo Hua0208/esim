@@ -1,3 +1,6 @@
+用戶訪問頁面 → acl.global.ts → canNavigate() → CASL ability.can() → 允許/拒絕
+
+
 # vue
 
 This template should help get you started developing with Vue 3 in Vite.

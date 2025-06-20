@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const billingController = require('../controllers/billingController');
+const auth = require('../middleware/auth');
 
 /**
  * @swagger
@@ -9,6 +10,8 @@ const billingController = require('../controllers/billingController');
  *     summary: 查詢帳務中心（總帳）
  *     tags:
  *       - Billing
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -78,7 +81,7 @@ const billingController = require('../controllers/billingController');
  *                     depositCount: { type: integer }
  *                     totalSpent: { type: number }
  */
-router.get('/center', billingController.getCenter);
+router.get('/center', auth, billingController.getCenter);
 
 /**
  * @swagger
@@ -87,6 +90,8 @@ router.get('/center', billingController.getCenter);
  *     summary: 系統儲值
  *     tags:
  *       - Billing
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -143,6 +148,6 @@ router.get('/center', billingController.getCenter);
  *                 code: { type: integer, example: 500 }
  *                 message: { type: string, example: "系統儲值失敗" }
  */
-router.post('/add-balance', billingController.addBalance);
+router.post('/add-balance', auth, billingController.addBalance);
 
 module.exports = router; 

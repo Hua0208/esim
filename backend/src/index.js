@@ -33,6 +33,21 @@ const swaggerOptions = {
         description: '開發伺服器',
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: '請輸入 JWT token，格式：Bearer <token>'
+        }
+      }
+    },
+    security: [
+      {
+        bearerAuth: []
+      }
+    ]
   },
   apis: ['./src/routes/*.js'], // API 路由文件的路徑
 };

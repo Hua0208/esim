@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/userController')
+const auth = require('../middleware/auth')
 //const { Order } = require('../models')
 
 /**
@@ -74,6 +75,8 @@ const userController = require('../controllers/userController')
  *   get:
  *     summary: 獲取所有用戶
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: 成功獲取用戶列表
@@ -86,6 +89,8 @@ const userController = require('../controllers/userController')
  *   post:
  *     summary: 創建新用戶
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -121,6 +126,8 @@ const userController = require('../controllers/userController')
  *   get:
  *     summary: 獲取單個用戶詳情（包含訂單列表）
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -139,6 +146,8 @@ const userController = require('../controllers/userController')
  *   put:
  *     summary: 更新用戶
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -174,6 +183,8 @@ const userController = require('../controllers/userController')
  *   patch:
  *     summary: 更新用戶備注
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -200,21 +211,21 @@ const userController = require('../controllers/userController')
 
 
 // 獲取所有用戶
-router.get('/', userController.getAllUsers)
+router.get('/', auth, userController.getAllUsers)
 
 // 獲取單個用戶詳情（包含訂單列表）
-router.get('/:id', userController.getUserById)
+router.get('/:id', auth, userController.getUserById)
 
 // 創建新用戶
-router.post('/', userController.createUser)
+router.post('/', auth, userController.createUser)
 
 // 更新用戶
-router.put('/:id', userController.updateUser)
+router.put('/:id', auth, userController.updateUser)
 
 // 更新用戶備注
-router.patch('/:id/note', userController.updateUserNote)
+router.patch('/:id/note', auth, userController.updateUserNote)
 
 // 獲取訂單 ICCID
-router.get('/orders/:orderId/iccid', userController.getOrderICCID)
+router.get('/orders/:orderId/iccid', auth, userController.getOrderICCID)
 
 module.exports = router 

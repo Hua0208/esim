@@ -1825,6 +1825,7 @@ _YHm5z3kLvndN4qCRju740Yd9T4lGJ5Hwg_zORpAdg,
 _YNTx2Nryg30kOxD14XhqJy1pIpVBCrlFsrLoJEA0Q
 ];
 
+const _lazy_wwBbfw = () => Promise.resolve().then(function () { return changePassword_post$3; });
 const _lazy_OyF2_o = () => Promise.resolve().then(function () { return index$3; });
 const _lazy_LUWHTG = () => Promise.resolve().then(function () { return courseDetails_get$1; });
 const _lazy_WNhntC = () => Promise.resolve().then(function () { return courses_get$1; });
@@ -1867,6 +1868,7 @@ const _lazy_GN3Y5V = () => Promise.resolve().then(function () { return _id__get$
 const _lazy_wA2S0g = () => Promise.resolve().then(function () { return index_get$7; });
 const _lazy_MdCyM1 = () => Promise.resolve().then(function () { return index_post$1; });
 const _lazy_rTvkjP = () => Promise.resolve().then(function () { return _____$1; });
+const _lazy_4Z4dvj = () => Promise.resolve().then(function () { return changePassword_post$1; });
 const _lazy_qTlwgn = () => Promise.resolve().then(function () { return projects_get$1; });
 const _lazy_t1pEs0 = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_1PjgRD = () => Promise.resolve().then(function () { return me_get$1; });
@@ -1880,6 +1882,7 @@ const _lazy_H_bVoQ = () => Promise.resolve().then(function () { return token_get
 const _lazy_wdLYoz = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
+  { route: '/api/account/change-password', handler: _lazy_wwBbfw, lazy: true, middleware: false, method: "post" },
   { route: '/api/app-bar/search', handler: _lazy_OyF2_o, lazy: true, middleware: false, method: undefined },
   { route: '/api/apps/academy/course-details', handler: _lazy_LUWHTG, lazy: true, middleware: false, method: "get" },
   { route: '/api/apps/academy/courses', handler: _lazy_WNhntC, lazy: true, middleware: false, method: "get" },
@@ -1922,6 +1925,7 @@ const handlers = [
   { route: '/api/apps/users', handler: _lazy_wA2S0g, lazy: true, middleware: false, method: "get" },
   { route: '/api/apps/users', handler: _lazy_MdCyM1, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/**', handler: _lazy_rTvkjP, lazy: true, middleware: false, method: undefined },
+  { route: '/api/auth/change-password', handler: _lazy_4Z4dvj, lazy: true, middleware: false, method: "post" },
   { route: '/api/dashboard/analytics/projects', handler: _lazy_qTlwgn, lazy: true, middleware: false, method: "get" },
   { route: '/api/login', handler: _lazy_t1pEs0, lazy: true, middleware: false, method: "post" },
   { route: '/api/me', handler: _lazy_1PjgRD, lazy: true, middleware: false, method: "get" },
@@ -2169,6 +2173,56 @@ const template$1 = (messages) => {
 const errorDev = /*#__PURE__*/Object.freeze({
   __proto__: null,
   template: template$1
+});
+
+const changePassword_post$2 = defineEventHandler(async (event) => {
+  try {
+    const body = await readBody(event);
+    const session = await getServerSession(event);
+    if (!(session == null ? void 0 : session.user)) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "\u672A\u6388\u6B0A"
+      });
+    }
+    const authData = {
+      username: session.user.username,
+      role: session.user.role,
+      email: session.user.email,
+      timestamp: Date.now()
+    };
+    const token = Buffer.from(JSON.stringify(authData)).toString("base64");
+    const backendUrl = "http://localhost:3030";
+    const response = await $fetch(`${backendUrl}/api/auth/change-password`, {
+      method: "POST",
+      body: {
+        currentPassword: body.currentPassword,
+        newPassword: body.newPassword
+      },
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error("\u5BC6\u78BC\u4FEE\u6539API\u932F\u8AA4:", error);
+    if (error.data) {
+      throw createError({
+        statusCode: error.statusCode || 500,
+        statusMessage: error.data.message || "\u4FEE\u6539\u5BC6\u78BC\u5931\u6557"
+      });
+    }
+    throw createError({
+      statusCode: 500,
+      statusMessage: "\u4FEE\u6539\u5BC6\u78BC\u5931\u6557\uFF0C\u8ACB\u7A0D\u5F8C\u518D\u8A66"
+    });
+  }
+});
+
+const changePassword_post$3 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: changePassword_post$2
 });
 
 const db$e = {
@@ -14138,7 +14192,7 @@ const _____ = NuxtAuthHandler({
       // 物件是必需的，但可以留空。
       async authorize(credentials) {
         var _a;
-        const { user } = await $fetch(`${(_a = process.env.NUXT_PUBLIC_API_BASE_URL) != null ? _a : "/api"}/auth/login`, {
+        const response = await $fetch(`${(_a = process.env.NUXT_PUBLIC_API_BASE_URL) != null ? _a : "/api"}/auth/login`, {
           method: "POST",
           body: JSON.stringify(credentials)
         }).catch((err) => {
@@ -14147,7 +14201,13 @@ const _____ = NuxtAuthHandler({
             statusMessage: JSON.stringify(err.data)
           });
         });
-        return user || null;
+        if (response.user && response.accessToken) {
+          return {
+            ...response.user,
+            accessToken: response.accessToken
+          };
+        }
+        return null;
       }
     })
   ],
@@ -14162,6 +14222,7 @@ const _____ = NuxtAuthHandler({
         token.avatar = user.avatar;
         token.abilityRules = user.abilityRules;
         token.role = user.role;
+        token.backendToken = user.accessToken;
       }
       return token;
     },
@@ -14172,6 +14233,7 @@ const _____ = NuxtAuthHandler({
         session.user.avatar = token.avatar;
         session.user.abilityRules = token.abilityRules;
         session.user.role = token.role;
+        session.backendToken = token.backendToken;
       }
       return session;
     }
@@ -14181,6 +14243,56 @@ const _____ = NuxtAuthHandler({
 const _____$1 = /*#__PURE__*/Object.freeze({
   __proto__: null,
   default: _____
+});
+
+const changePassword_post = defineEventHandler(async (event) => {
+  try {
+    const body = await readBody(event);
+    const session = await getServerSession(event);
+    if (!(session == null ? void 0 : session.user)) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "\u672A\u6388\u6B0A"
+      });
+    }
+    const authData = {
+      username: session.user.username,
+      role: session.user.role,
+      email: session.user.email,
+      timestamp: Date.now()
+    };
+    const token = Buffer.from(JSON.stringify(authData)).toString("base64");
+    const backendUrl = "http://localhost:3030";
+    const response = await $fetch(`${backendUrl}/api/auth/change-password`, {
+      method: "POST",
+      body: {
+        currentPassword: body.currentPassword,
+        newPassword: body.newPassword
+      },
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error("\u5BC6\u78BC\u4FEE\u6539API\u932F\u8AA4:", error);
+    if (error.data) {
+      throw createError({
+        statusCode: error.statusCode || 500,
+        statusMessage: error.data.message || "\u4FEE\u6539\u5BC6\u78BC\u5931\u6557"
+      });
+    }
+    throw createError({
+      statusCode: 500,
+      statusMessage: "\u4FEE\u6539\u5BC6\u78BC\u5931\u6557\uFF0C\u8ACB\u7A0D\u5F8C\u518D\u8A66"
+    });
+  }
+});
+
+const changePassword_post$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: changePassword_post
 });
 
 const figmaLabel$1 = getPublicUrl("/images/icons/brands/figma-label.png");

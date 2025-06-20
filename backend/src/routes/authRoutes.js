@@ -196,6 +196,47 @@ router.post('/unlock/:userId', auth, authController.unlockUser);
 
 /**
  * @swagger
+ * /api/auth/change-password:
+ *   post:
+ *     summary: 修改用戶密碼
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: 當前密碼
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: 新密碼
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: 密碼修改成功
+ *       400:
+ *         description: 請求參數錯誤
+ *       401:
+ *         description: 當前密碼錯誤
+ *       404:
+ *         description: 用戶不存在
+ *       500:
+ *         description: 伺服器錯誤
+ */
+router.post('/change-password', auth, authController.changePassword);
+
+/**
+ * @swagger
  * /api/auth/error:
  *   get:
  *     summary: 錯誤處理

@@ -157,9 +157,10 @@ const toggleCard = (productId: number) => {
                         {{ expandedCards.has(product.id) ? t('Collapse') : t('Expand') }}
                         ({{ product.Details.countries?.length || 0 }})
                       </VBtn>
-                      <div v-show="expandedCards.has(product.id)" class="mt-2">
-                        {{ product.Details.countries?.map(code => countryName(code)).join(', ') }}
-                      </div>                    </p>
+                    </p>
+                    <div v-show="expandedCards.has(product.id)" class="mt-2 mb-2">
+                      {{ product.Details.countries?.map(code => countryName(code)).join(', ') }}
+                    </div>
                     <p class="mb-2">
                       <strong>{{ t('DataLimit') }}：</strong>{{ product.Details.productDetails?.PLAN_DATA_LIMIT }} {{ product.Details.productDetails?.PLAN_DATA_UNIT }}
                     </p>

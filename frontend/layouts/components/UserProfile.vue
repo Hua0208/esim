@@ -6,17 +6,13 @@ import type { RouteLocationRaw } from 'vue-router'
 const ability = useAbility()
 const { t } = useI18n()
 
-// TODO: Get type from backend
-const userData = useCookie<any>('userData')
-console.log(userData.value)
+// 使用 NextAuth session 而不是 cookie
+const { data: session } = useAuth()
 const { signOut } = useAuth()
 
 async function logout() {
   try {
     await signOut({ redirect: false })
-
-    // Remove "userData" from cookie
-    userData.value = null
 
     // Reset user abilities
     ability.update([])
@@ -58,7 +54,7 @@ const userProfileList: UserProfileItem[] = [
 
 <template>
   <VBadge
-    v-if="userData"
+    v-if="session?.user"
     dot
     bordered
     location="bottom right"
@@ -69,12 +65,12 @@ const userProfileList: UserProfileItem[] = [
     <VAvatar
       size="38"
       class="cursor-pointer"
-      :color="!(userData && userData.avatar) ? 'primary' : undefined"
-      :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
+      :color="!(session?.user?.avatar) ? 'primary' : undefined"
+      :variant="!(session?.user?.avatar) ? 'tonal' : undefined"
     >
       <VImg
-        v-if="userData && userData.avatar"
-        :src="userData.avatar"
+        v-if="session?.user?.avatar"
+        :src="session.user.avatar"
       />
       <VIcon
         v-else
@@ -101,12 +97,12 @@ const userProfileList: UserProfileItem[] = [
                   bordered
                 >
                   <VAvatar
-                    :color="!(userData && userData.avatar) ? 'primary' : undefined"
-                    :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
+                    :color="!(session?.user?.avatar) ? 'primary' : undefined"
+                    :variant="!(session?.user?.avatar) ? 'tonal' : undefined"
                   >
                     <VImg
-                      v-if="userData && userData.avatar"
-                      :src="userData.avatar"
+                      v-if="session?.user?.avatar"
+                      :src="session.user.avatar"
                     />
                     <VIcon
                       v-else
@@ -118,10 +114,10 @@ const userProfileList: UserProfileItem[] = [
 
               <div>
                 <h6 class="text-h6 font-weight-medium">
-                  {{ userData.fullName || userData.username }}
+                  {{ session?.user?.fullName || session?.user?.username }}
                 </h6>
                 <VListItemSubtitle class="text-capitalize text-disabled">
-                  {{ userData.role }}
+                  {{ session?.user?.role }}
                 </VListItemSubtitle>
               </div>
             </div>

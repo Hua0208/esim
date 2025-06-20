@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const groupController = require('../controllers/groupController')
+const auth = require('../middleware/auth')
 
 /**
  * @swagger
@@ -31,6 +32,8 @@ const groupController = require('../controllers/groupController')
  *   get:
  *     summary: 獲取所有群組
  *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: 成功獲取群組列表
@@ -43,6 +46,8 @@ const groupController = require('../controllers/groupController')
  *   post:
  *     summary: 創建新群組
  *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -71,6 +76,8 @@ const groupController = require('../controllers/groupController')
  *   put:
  *     summary: 更新群組
  *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -96,12 +103,12 @@ const groupController = require('../controllers/groupController')
  */
 
 // 獲取所有群組
-router.get('/', groupController.getAllGroups)
+router.get('/', auth, groupController.getAllGroups)
 
 // 創建新群組
-router.post('/', groupController.createGroup)
+router.post('/', auth, groupController.createGroup)
 
 // 更新群組
-router.put('/:id', groupController.updateGroup)
+router.put('/:id', auth, groupController.updateGroup)
 
 module.exports = router 

@@ -10,6 +10,8 @@ import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import { useRoute } from 'vue-router'
+// import { useAuth } from '@/composables/useAuth'  // useAuth 是 Nuxt 全域 composable，不需要 import
+// import { usePermissions } from '@/composables/usePermissions'  // 此文件已被刪除
 
 const { signIn, data: sessionData } = useAuth()
 
@@ -85,15 +87,10 @@ async function login() {
   // Reset error on successful login
   errors.value = {}
 
-  // Update user abilities
-  const { user } = sessionData.value!
-
-  useCookie<Partial<User>>('userData').value = user
-
-  // Save user abilities in cookie so we can retrieve it back on refresh
-  useCookie<User['abilityRules']>('userAbilityRules').value = user.abilityRules
-
-  ability.update(user.abilityRules ?? [])
+  // 更新權限 - 權限信息已經在 NextAuth session 中
+  if (sessionData.value?.user?.abilityRules) {
+    ability.update(sessionData.value.user.abilityRules)
+  }
 
   navigateTo(route.query.to ? String(route.query.to) : '/', { replace: true })
 }
