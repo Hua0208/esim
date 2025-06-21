@@ -31,7 +31,6 @@ export { computedAsync, asyncComputed, computedEager, eagerComputed, computedInj
 export { createGenericProjection, createProjection, logicAnd, logicNot, logicOr, useAbs, useAverage, useCeil, useClamp, useFloor, useMath, useMax, useMin, usePrecision, useProjection, useRound, useSum, useTrunc } from '@vueuse/math';
 export { injectHead, useHead, useSeoMeta, useHeadSafe, useServerHead, useServerSeoMeta, useServerHeadSafe } from '@unhead/vue';
 export { useApi } from '../composables/useApi';
-export { $api } from '../utils/api';
 export { COOKIE_MAX_AGE_1_YEAR } from '../utils/constants';
 export { paginationMeta } from '../utils/paginationMeta';
 export { hexToRgb, rgbaToHex } from '../@core/utils/colorConverter';

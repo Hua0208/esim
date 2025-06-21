@@ -20,25 +20,43 @@ export default NuxtAuthHandler({
       name: 'Credentials',
       credentials: {}, // 物件是必需的，但可以留空。
       async authorize(credentials: any) {
-        const response = await $fetch<any>(`${process.env.NUXT_PUBLIC_API_BASE_URL ?? '/api'}/auth/login`, {
-          method: 'POST',
-          body: JSON.stringify(credentials),
-        }).catch((err: NuxtError) => {
+        try {
+          const response = await $fetch<any>(`${process.env.NUXT_PUBLIC_API_BASE_URL ?? '/api'}/auth/login`, {
+            method: 'POST',
+            body: JSON.stringify(credentials),
+          })
+
+          // 返回包含 accessToken 的用戶資料
+          if (response.user && response.accessToken) {
+            return {
+              ...response.user,
+              accessToken: response.accessToken
+            }
+          }
+
+          return null
+        } catch (err: any) {
+          console.error('NextAuth authorize error:', err)
+          
+          // 檢查是否為 TOTP 驗證錯誤
+          if (err.data && err.data.requireTotp) {
+            // 拋出包含 TOTP 資訊的錯誤
+            throw createError({
+              statusCode: 403,
+              statusMessage: JSON.stringify({
+                requireTotp: true,
+                userId: err.data.userId,
+                message: err.data.message || 'TOTP verification required'
+              }),
+            })
+          }
+          
+          // 其他錯誤
           throw createError({
             statusCode: err.statusCode || 403,
             statusMessage: JSON.stringify(err.data),
           })
-        })
-
-        // 返回包含 accessToken 的用戶資料
-        if (response.user && response.accessToken) {
-          return {
-            ...response.user,
-            accessToken: response.accessToken
-          }
         }
-
-        return null
       },
     }),
   ],

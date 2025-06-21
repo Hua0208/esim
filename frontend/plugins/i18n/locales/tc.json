@@ -315,6 +315,8 @@
   },
 
   "ProductId": "產品編號",
+  "Expand": "展開",
+  "Collapse": "收起",
   "Status": "狀態",
   "Provider": "供應商",
   "Price": "價格",

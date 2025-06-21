@@ -14192,22 +14192,35 @@ const _____ = NuxtAuthHandler({
       // 物件是必需的，但可以留空。
       async authorize(credentials) {
         var _a;
-        const response = await $fetch(`${(_a = process.env.NUXT_PUBLIC_API_BASE_URL) != null ? _a : "/api"}/auth/login`, {
-          method: "POST",
-          body: JSON.stringify(credentials)
-        }).catch((err) => {
+        try {
+          const response = await $fetch(`${(_a = process.env.NUXT_PUBLIC_API_BASE_URL) != null ? _a : "/api"}/auth/login`, {
+            method: "POST",
+            body: JSON.stringify(credentials)
+          });
+          if (response.user && response.accessToken) {
+            return {
+              ...response.user,
+              accessToken: response.accessToken
+            };
+          }
+          return null;
+        } catch (err) {
+          console.error("NextAuth authorize error:", err);
+          if (err.data && err.data.requireTotp) {
+            throw createError({
+              statusCode: 403,
+              statusMessage: JSON.stringify({
+                requireTotp: true,
+                userId: err.data.userId,
+                message: err.data.message || "TOTP verification required"
+              })
+            });
+          }
           throw createError({
             statusCode: err.statusCode || 403,
             statusMessage: JSON.stringify(err.data)
           });
-        });
-        if (response.user && response.accessToken) {
-          return {
-            ...response.user,
-            accessToken: response.accessToken
-          };
         }
-        return null;
       }
     })
   ],

@@ -18,10 +18,10 @@ const { signIn, data: sessionData } = useAuth()
 definePageMeta({
   layout: 'blank',
   unauthenticatedOnly: true,
-
 })
 
 const isPasswordVisible = ref(false)
+const isTotpVisible = ref(false)
 
 const route = useRoute()
 
@@ -30,29 +30,142 @@ const ability = useAbility()
 const errors = ref<Record<string, string | undefined>>({
   username: undefined,
   password: undefined,
+  totpToken: undefined,
 })
 
 const refVForm = ref<VForm>()
 
 const credentials = ref({
   username: 'admin',
-  password: 'admin',
+  password: 'localhost!',
+  totpToken: '',
 })
 
 const rememberMe = ref(false)
 
+// TOTP 相關狀態
+const requireTotp = ref(false)
+const totpUserId = ref<number | null>(null)
+// const totpSessionId = ref<string | null>(null) // 不再需要 sessionId
+const isVerifyingTotp = ref(false)
+
 const errorMsg = computed(() => {
   switch (route.query.error) {
     case 'CredentialsSignin':
-      return '帳號或密碼錯誤'
+      return 'Invalid username or password'
     case 'AccessDenied':
-      return '權限不足'
+      return 'Access denied'
     case 'default':
-      return '登入失敗，請再試一次'
+      return 'Login failed, please try again'
     default:
       return ''
   }
 })
+
+// 驗證 TOTP 代碼
+const verifyTotp = async () => {
+  if (!credentials.value.totpToken || !totpUserId.value) {
+    errors.value.totpToken = 'Please enter verification code'
+    return
+  }
+
+  try {
+    isVerifyingTotp.value = true
+    errors.value.totpToken = undefined
+
+    // TOTP 驗證成功，重新調用 NextAuth 登入流程
+    const loginResponse = await signIn('credentials', {
+      callbackUrl: '/',
+      redirect: false,
+      username: credentials.value.username,
+      password: credentials.value.password,
+      totpToken: credentials.value.totpToken
+    })
+
+    if (loginResponse && loginResponse.error) {
+      console.error('Login with TOTP failed:', loginResponse.error)
+      errors.value.totpToken = 'Login failed after TOTP verification'
+      return
+    }
+
+    // 登入成功
+    errors.value = {}
+    
+    // 更新權限
+    if (sessionData.value?.user?.abilityRules) {
+      ability.update(sessionData.value.user.abilityRules)
+    }
+
+    // 導航到首頁
+    navigateTo(route.query.to ? String(route.query.to) : '/', { replace: true })
+  } catch (error: any) {
+    console.error('TOTP verification failed:', error)
+    errors.value.totpToken = error.data?.message || 'Invalid verification code'
+  } finally {
+    isVerifyingTotp.value = false
+  }
+}
+
+// 使用備用代碼
+const useBackupCode = async () => {
+  const backupCode = prompt('Please enter backup code:')
+  if (!backupCode || !totpUserId.value) return
+
+  try {
+    isVerifyingTotp.value = true
+    errors.value.totpToken = undefined
+
+    const config = useRuntimeConfig()
+    const response = await $fetch<any>(`${config.public.apiBaseUrl}/auth/totp/backup`, {
+      method: 'POST',
+      body: {
+        userId: totpUserId.value,
+        backupCode: backupCode
+      }
+    })
+
+    // 備用代碼驗證成功，直接使用返回的 JWT token
+    if (response.accessToken) {
+      // 將 JWT token 存儲到 cookie 中
+      const cookie = useCookie('auth-token', {
+        default: () => null,
+        watch: true,
+        httpOnly: false,
+        secure: true,
+        sameSite: 'lax'
+      })
+      cookie.value = response.accessToken
+
+      // 更新權限
+      if (response.user?.abilityRules) {
+        ability.update(response.user.abilityRules)
+      }
+
+      // 導航到首頁
+      navigateTo(route.query.to ? String(route.query.to) : '/', { replace: true })
+    } else {
+      errors.value.totpToken = 'Login failed after backup code verification'
+    }
+  } catch (error: any) {
+    console.error('Backup code verification failed:', error)
+    errors.value.totpToken = error.data?.message || 'Invalid backup code'
+  } finally {
+    isVerifyingTotp.value = false
+  }
+}
+
+// 完成登入流程
+const completeLogin = async () => {
+  // 重置錯誤
+  errors.value = {}
+
+  // 更新權限 - 權限信息已經在 NextAuth session 中
+  if (sessionData.value?.user?.abilityRules) {
+    ability.update(sessionData.value.user.abilityRules)
+  }
+
+  navigateTo(route.query.to ? String(route.query.to) : '/', { replace: true })
+}
 
 async function login() {
   const response = await signIn('credentials', {
@@ -63,14 +176,21 @@ async function login() {
 
   // If error is not null => Error is occurred
   if (response && response.error) {
-
     try {
       const parsedError = JSON.parse(response.error)
+      
+      // 檢查是否需要 TOTP 驗證
+      if (parsedError.requireTotp && parsedError.userId) {
+        requireTotp.value = true
+        totpUserId.value = parsedError.userId
+        errors.value = {}
+        return
+      }
+      
       // 自動對應 message 到欄位
       if (parsedError.message) {
         errors.value = {
           username: parsedError.message,
-          //password: parsedError.message,
         }
       } else {
         errors.value = parsedError
@@ -78,7 +198,6 @@ async function login() {
     } catch (e) {
       errors.value = {}
     }
-    
 
     // If err => Don't execute further
     return
@@ -98,9 +217,27 @@ async function login() {
 const onSubmit = () => {
   refVForm.value?.validate()
     .then(({ valid: isValid }) => {
-      if (isValid)
-        login()
+      if (isValid) {
+        if (requireTotp.value) {
+          verifyTotp()
+        } else {
+          login()
+        }
+      }
     })
+}
+
+// 重置 TOTP 狀態
+const resetTotpState = () => {
+  requireTotp.value = false
+  totpUserId.value = null
+  credentials.value.totpToken = ''
+  errors.value.totpToken = undefined
+}
+
+// 返回密碼登入
+const backToPasswordLogin = () => {
+  resetTotpState()
 }
 </script>
 
@@ -139,37 +276,14 @@ const onSubmit = () => {
           </VCardTitle>
         </VCardItem>
 
-        <!-- <VCardText>
-          <h4 class="text-h4 mb-1">
-             Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻 -->
-          <!-- </h4>
-          <p class="mb-0">
-            Please sign-in to your account and start the adventure
-          </p>
-        </VCardText>
-
-        <VCardText>
-          <VAlert
-            color="primary"
-            variant="tonal"
-          >
-            <p class="text-sm mb-2">
-              Admin Email: <strong>admin@demo.com</strong> / Pass: <strong>admin</strong>
-            </p>
-            <p class="text-sm mb-0">
-              Client Email: <strong>client@demo.com</strong> / Pass: <strong>client</strong>
-            </p>
-          </VAlert>
-        </VCardText> --> 
-
         <VCardText>
           <VForm
             ref="refVForm"
             @submit.prevent="onSubmit"
           >
             <VRow>
-              <!-- username -->
-              <VCol cols="12">
+              <!-- username (只在非 TOTP 模式下顯示) -->
+              <VCol v-if="!requireTotp" cols="12">
                 <AppTextField
                   v-model="credentials.username"
                   label="Username"
@@ -181,8 +295,8 @@ const onSubmit = () => {
                 />
               </VCol>
 
-              <!-- password -->
-              <VCol cols="12">
+              <!-- password (只在非 TOTP 模式下顯示) -->
+              <VCol v-if="!requireTotp" cols="12">
                 <AppTextField
                   v-model="credentials.password"
                   label="Password"
@@ -208,44 +322,57 @@ const onSubmit = () => {
                     Forgot Password?
                   </NuxtLink>
                 </div>
+              </VCol>
 
+              <!-- TOTP 驗證碼輸入 -->
+              <VCol v-if="requireTotp" cols="12">
+                <AppTextField
+                  v-model="credentials.totpToken"
+                  label="Verification Code"
+                  placeholder="123 456"
+                  type="text"
+                  autofocus
+                  :rules="[
+                    (v: string) => !!v || 'Please enter verification code',
+                    (v: string) => /^\d{6}$/.test(v) || 'Please enter 6-digit code'
+                  ]"
+                  :error-messages="errors.totpToken"
+                />
+              </VCol>
+
+              <!-- 登入按鈕 -->
+              <VCol cols="12">
                 <VBtn
                   block
                   type="submit"
+                  :loading="isVerifyingTotp"
+                  :disabled="isVerifyingTotp"
                 >
-                  Login
+                  {{ requireTotp ? 'Verify' : 'Login' }}
                 </VBtn>
               </VCol>
 
-              <!-- create account -->
-              <!-- <VCol
-                cols="12"
-                class="text-body-1 text-center"
-              >
-                <span class="d-inline-block">New on our platform?</span>
-                <NuxtLink
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  :to="{ name: 'register' }"
-                >
-                  Create an account
-                </NuxtLink>
-              </VCol> -->
-              <!-- <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
-                <VDivider />
-                <span class="mx-4 text-high-emphasis">or</span>
-                <VDivider />
-              </VCol> -->
-
-              <!-- auth providers -->
-              <!-- <VCol
-                cols="12"
-                class="text-center"
-              >
-                <AuthProvider />
-              </VCol> -->
+              <!-- TOTP 相關按鈕 -->
+              <VCol v-if="requireTotp" cols="12">
+                <div class="d-flex align-center justify-space-between">
+                  <VBtn
+                    variant="text"
+                    color="primary"
+                    @click="useBackupCode"
+                    :disabled="isVerifyingTotp"
+                  >
+                    Use Backup Code
+                  </VBtn>
+                  <VBtn
+                    variant="text"
+                    color="secondary"
+                    @click="backToPasswordLogin"
+                    :disabled="isVerifyingTotp"
+                  >
+                    Back
+                  </VBtn>
+                </div>
+              </VCol>
             </VRow>
           </VForm>
         </VCardText>
