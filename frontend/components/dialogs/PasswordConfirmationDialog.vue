@@ -49,7 +49,7 @@ const closeDialog = () => {
             label="密碼"
             autocomplete="current-password"
             placeholder="············"
-            :rules="[v => !!v || '請輸入密碼']"
+            :rules="[(v: string) => !!v || '請輸入密碼']"
             @click:append-inner="isPasswordVisible = !isPasswordVisible"
           />
         </VCardText>

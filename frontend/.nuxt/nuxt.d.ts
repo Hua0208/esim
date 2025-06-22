@@ -1,5 +1,5 @@
-/// <reference types="@nuxtjs/i18n" />
 /// <reference types="@vueuse/nuxt" />
+/// <reference types="@nuxtjs/i18n" />
 /// <reference types="@nuxtjs/device" />
 /// <reference types="@sidebase/nuxt-auth" />
 /// <reference types="@pinia/nuxt" />

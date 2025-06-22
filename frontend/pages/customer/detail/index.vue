@@ -112,7 +112,7 @@ const handleCreateUser = async () => {
       body: JSON.stringify(newUser.value)
     })
     
-    if (error.value || data.value?.code !== 200) {
+    if (error.value || (data.value?.code !== 200 && data.value?.code !== 201)) {
       showSnackbar(error.value?.message || data.value?.message || '創建用戶失敗', 'error')
       return
     }
@@ -138,7 +138,7 @@ const handleUpdateNote = async () => {
       })
     })
     
-    if (error.value || data.value?.code !== 200) {
+    if (error.value || (data.value?.code !== 200 && data.value?.code !== 201)) {
       showSnackbar(error.value?.message || data.value?.message || '更新備註失敗', 'error')
       return
     }
@@ -146,7 +146,7 @@ const handleUpdateNote = async () => {
     selectedUser.value.note = editingNote.value
     showNoteDialog.value = false
     showSnackbar('更新備註成功', 'success')
-    refreshUsers()
+    await refreshUsers()
   } catch (error) {
     console.error('更新用戶備注失敗:', error)
     showSnackbar('更新備註失敗，請稍後再試', 'error')
