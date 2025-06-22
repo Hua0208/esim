@@ -9,14 +9,14 @@
     </span>
     <!-- 👉 Footer: right content -->
     <span class="d-md-flex gap-x-4 text-primary d-none">
-      <a
+      <!-- <a
         href="https://demos.pixinvent.com/vuexy-vuejs-admin-template/documentation/"
         target="noopener noreferrer"
       >Documentation</a>
       <a
         href="https://pixinvent.ticksy.com/"
         target="noopener noreferrer"
-      >Support</a>
+      >Support</a> -->
     </span>
   </div>
 </template>

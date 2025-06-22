@@ -58,8 +58,8 @@ import { VerticalNavLayout } from '@layouts'
     </template>
 
     <!-- 👉 Customizer -->
-    <TheCustomizer />
+    <!-- <TheCustomizer /> -->
     <!-- 👉 Session Debugger -->
-    <SessionDebugger />
+    <!-- <SessionDebugger />-->
   </VerticalNavLayout>
 </template>
