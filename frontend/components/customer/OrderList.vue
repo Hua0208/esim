@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import dayjs from 'dayjs'
 
 interface Order {
@@ -28,6 +29,9 @@ const emit = defineEmits<{
   (e: 'showDetail', iccid: string): void
 }>()
 
+// 添加一個 Set 來追蹤正在處理的訂單 ID
+const processingOrders = ref(new Set<number>())
+
 const orderHeaders = [
   { title: '訂單編號', key: 'id', width: '150' },
   { title: '產品名稱', key: 'productName' },
@@ -44,6 +48,23 @@ const statusMap = {
   completed: { text: '已完成', color: 'success' },
   cancelled: { text: '已取消', color: 'error' }
 }
+
+// 處理確認訂單點擊
+const handleComplete = (orderId: number) => {
+  if (processingOrders.value.has(orderId)) {
+    return // 如果正在處理中，直接返回
+  }
+  
+  processingOrders.value.add(orderId) // 添加到處理中集合
+  emit('complete', orderId)
+}
+
+// 監聽父組件的 loading 狀態變化，當 loading 結束時清除處理中的訂單
+watch(() => props.loading, (newLoading) => {
+  if (!newLoading) {
+    processingOrders.value.clear()
+  }
+})
 </script>
 
 <template>
@@ -70,7 +91,9 @@ const statusMap = {
               v-if="item.status === 'pending'"
               color="success"
               size="small"
-              @click="emit('complete', item.id)"
+              :loading="processingOrders.has(item.id)"
+              :disabled="processingOrders.has(item.id)"
+              @click="handleComplete(item.id)"
             >
               確認訂單
             </VBtn>

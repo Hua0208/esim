@@ -193,6 +193,7 @@ const handlePurchase = async () => {
 
 const selectedOrderId = ref<string | null>(null)
 const showDepositDialog = ref(false)
+const completeOrderLoading = ref(false)
 
 const handleOpenDeposit = (orderId: number) => {
   selectedOrderId.value = String(orderId)
@@ -254,7 +255,12 @@ const handleShowDetail = async (iccid: string) => {
 }
 
 const handleCompleteOrder = async (id: number) => {
+  if (completeOrderLoading.value) {
+    return // 如果正在處理中，直接返回
+  }
+  
   try {
+    completeOrderLoading.value = true
     const { data, error } = await useApi<ApiResponse<void>>('/esim/complete', {
       method: 'POST',
       body: JSON.stringify({ 
@@ -277,6 +283,7 @@ const handleCompleteOrder = async (id: number) => {
     console.error('確認訂單失敗:', error)
     showSnackbar('確認訂單失敗，請稍後再試', 'error')
   } finally {
+    completeOrderLoading.value = false
     await refreshUser()
   }
 }
@@ -336,7 +343,7 @@ onMounted(() => {
 
       <OrderList
         :orders="orders"
-        :loading="loading"
+        :loading="loading || completeOrderLoading"
         @complete="handleCompleteOrder"
         @deposit="handleOpenDeposit"
         @show-detail="handleShowDetail"

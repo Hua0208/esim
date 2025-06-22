@@ -32,8 +32,8 @@ const features = [
 ]
 
 const systemInfo = {
-  version: '1.0.0',
-  lastUpdate: '2025-06-15',
+  version: '1.2.0',
+  lastUpdate: '2025-06-23',
   features: [
     t('dashboards.info.systemFeatures.providers'),
     t('dashboards.info.systemFeatures.realtime'),
