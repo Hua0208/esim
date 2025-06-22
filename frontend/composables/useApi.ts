@@ -1,7 +1,12 @@
 import { defu } from 'defu'
 import type { UseFetchOptions } from 'nuxt/app'
 
-export const useApi: typeof useFetch = <T>(url: MaybeRefOrGetter<string>, options: UseFetchOptions<T> = {}) => {
+// 定義一個新的 interface 來擴展 UseFetchOptions
+interface CustomUseFetchOptions<T> extends UseFetchOptions<T> {
+  skipGlobalErrorHandler?: boolean
+}
+
+export const useApi: typeof useFetch = <T>(url: MaybeRefOrGetter<string>, options: CustomUseFetchOptions<T> = {}) => {
   const config = useRuntimeConfig()
   const { data: session, signOut } = useAuth()
   
@@ -25,6 +30,10 @@ export const useApi: typeof useFetch = <T>(url: MaybeRefOrGetter<string>, option
     // 注意：這需要後端 CORS 設定允許 credentials
     // 添加錯誤處理
     onResponseError({ response }) {
+      // 如果 skipGlobalErrorHandler 為 true，則跳過全域錯誤處理
+      if (options.skipGlobalErrorHandler)
+        return
+
       // 如果收到 401 錯誤，可能是 token 過期
       if (response.status === 401) {
         console.log('Token might be expired, signing out.')

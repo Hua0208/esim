@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import PasswordConfirmationDialog from '@/components/dialogs/PasswordConfirmationDialog.vue'
 import laptopGirl from '@images/illustrations/laptop-girl.png'
 import { useApi } from '@/composables/useApi'
 
@@ -23,11 +24,47 @@ const isLoading = ref(false)
 // 成功訊息
 const successMessage = ref('')
 
+// TOTP 狀態
+const totpStatus = ref<{
+  totpEnabled: boolean
+  backupCodes?: string[]
+} | null>(null)
+const isLoadingTotpStatus = ref(false)
+
 const passwordRequirements = [
   '至少8個字元',
   '至少一個小寫字母',
   '至少一個數字, 符號, 或空白字元',
 ]
+
+// 獲取用戶資料（包括 TOTP 狀態）
+const fetchUserProfile = async () => {
+  try {
+    isLoadingTotpStatus.value = true
+    
+    const { data, error } = await useApi('/auth/profile')
+    
+    if (error.value) {
+      console.error('獲取用戶資料失敗:', error.value)
+      return
+    }
+    
+    const responseData = data.value as any
+
+    // API 回應的資料在 data.value.data 中
+    if (responseData && responseData.data) {
+      const userData = responseData.data
+      totpStatus.value = {
+        totpEnabled: userData.totpEnabled || false,
+        backupCodes: userData.backupCodes || []
+      }
+    }
+  } catch (err) {
+    console.error('獲取用戶資料錯誤:', err)
+  } finally {
+    isLoadingTotpStatus.value = false
+  }
+}
 
 // 密碼強度驗證
 const validatePassword = (password: string) => {
@@ -142,6 +179,66 @@ const resetForm = () => {
   successMessage.value = ''
 }
 
+// TOTP 相關
+const isOneTimePasswordDialogVisible = ref(false)
+const isPasswordConfirmationDialogVisible = ref(false)
+
+// 處理 TOTP 啟用成功
+const handleTotpEnabled = (backupCodes: string[]) => {
+  // 更新 TOTP 狀態
+  totpStatus.value = {
+    totpEnabled: true,
+    backupCodes: backupCodes
+  }
+  
+  // 關閉對話框
+  isOneTimePasswordDialogVisible.value = false
+}
+
+// 禁用 TOTP
+const disableTotp = async (password: string) => {
+  try {
+    const { error } = await useApi('/auth/totp/disable', {
+      method: 'POST',
+      body: { password },
+      skipGlobalErrorHandler: true,
+    } as any)
+
+    if (error.value) {
+      // 本地處理錯誤，而不是觸發全域登出
+      alert(error.value.data?.message || '禁用雙因素驗證失敗，請檢查您的密碼。')
+
+      return
+    }
+
+    // 更新狀態
+    totpStatus.value = {
+      totpEnabled: false,
+      backupCodes: [],
+    }
+
+    alert('雙因素驗證已禁用')
+  }
+  catch (err) {
+    console.error('禁用 TOTP 錯誤:', err)
+    alert('禁用雙因素驗證失敗')
+  }
+}
+
+const openPasswordConfirmationDialog = () => {
+  isPasswordConfirmationDialogVisible.value = true
+}
+
+// 頁面載入時獲取用戶資料
+onMounted(() => {
+  // 檢查 session 狀態
+  const { data: session } = useAuth()
+  console.log('Session 狀態:', session.value)
+  console.log('Backend Token:', session.value?.backendToken)
+  
+  fetchUserProfile()
+})
+
 const recentDevicesHeaders = [
   { title: 'BROWSER', key: 'browser' },
   { title: 'DEVICE', key: 'device' },
@@ -193,8 +290,6 @@ const recentDevices = [
     deviceIcon: { icon: 'tabler-brand-android', color: 'success' },
   },
 ]
-
-const isOneTimePasswordDialogVisible = ref(false)
 </script>
 
 <template>
@@ -336,26 +431,59 @@ const isOneTimePasswordDialogVisible = ref(false)
     <VCol cols="12">
       <VCard title="雙因素驗證">
         <VCardText>
-          <h5 class="text-h5 text-medium-emphasis mb-4">
-            兩步驟驗證尚未啟用。
-          </h5>
-          <p class="mb-6">
-            兩步驟驗證可以增加帳號的安全性，需要密碼和驗證碼才能登入。
-            <a
-              href="javascript:void(0)"
-              class="text-decoration-none"
-            >Learn more.</a>
-          </p>
+          <!-- 載入中 -->
+          <div v-if="isLoadingTotpStatus" class="d-flex justify-center mb-4">
+            <VProgressCircular
+              indeterminate
+              color="primary"
+            />
+          </div>
 
-          <VBtn @click="isOneTimePasswordDialogVisible = true">
-            啟用兩步驟驗證
-          </VBtn>
+          <!-- TOTP 已啟用 -->
+          <div v-else-if="totpStatus?.totpEnabled">
+            <VAlert
+              type="success"
+              variant="tonal"
+              class="mb-4"
+            >
+              <template #title>雙因素驗證已啟用</template>
+              <template #text>
+                您的帳戶已受到雙因素驗證保護。登入時需要密碼和驗證碼。
+              </template>
+            </VAlert>
+
+            <div class="d-flex gap-4">
+              <VBtn
+                color="error"
+                variant="tonal"
+                @click="openPasswordConfirmationDialog"
+              >
+                禁用雙因素驗證
+              </VBtn>
+            </div>
+          </div>
+
+          <!-- TOTP 未啟用 -->
+          <div v-else>
+            <h5 class="text-h5 text-medium-emphasis mb-4">
+              兩步驟驗證尚未啟用。
+            </h5>
+            <p class="mb-6">
+              兩步驟驗證可以增加帳號的安全性，需要密碼和驗證碼才能登入。
+              <a
+                href="javascript:void(0)"
+                class="text-decoration-none"
+              >Learn more.</a>
+            </p>
+
+            <VBtn @click="isOneTimePasswordDialogVisible = true">
+              啟用兩步驟驗證
+            </VBtn>
+          </div>
         </VCardText>
       </VCard>
     </VCol>
     <!-- !SECTION -->
-
-
 
     <!-- SECTION Recent Devices -->
     <!-- <VCol cols="12">
@@ -389,8 +517,17 @@ const isOneTimePasswordDialogVisible = ref(false)
   </VRow>
 
   <!-- SECTION Enable One time password -->
-  <TwoFactorAuthDialog v-model:is-dialog-visible="isOneTimePasswordDialogVisible" />
+  <TwoFactorAuthDialog 
+    v-model:is-dialog-visible="isOneTimePasswordDialogVisible" 
+    @totp-enabled="handleTotpEnabled"
+  />
   <!-- !SECTION -->
+
+  <!-- SECTION Password Confirmation Dialog -->
+  <PasswordConfirmationDialog
+    v-model:is-dialog-visible="isPasswordConfirmationDialogVisible"
+    @confirm="disableTotp"
+  />
 </template>
 
 <style lang="scss" scoped>
