@@ -17,14 +17,10 @@ const auth = async (req, res, next) => {
       user = await User.findByPk(decoded.id);
       
       if (user) {
-        console.log('JWT 認證成功:', { userId: user.id, username: user.username });
       }
     } catch (jwtError) {
-      console.error('JWT 解析失敗:', jwtError.message);
       return res.status(401).json({ message: '認證失敗：無效的 JWT token' });
       
-      // 註解掉 base64 編碼驗證
-      /*
       console.log('JWT 解析失敗，嘗試 base64 編碼:', jwtError.message);
       
       // 如果不是JWT，嘗試解析為base64編碼的用戶資料
