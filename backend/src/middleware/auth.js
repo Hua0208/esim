@@ -40,7 +40,6 @@ const auth = async (req, res, next) => {
         console.error('Token解析失敗:', { jwtError: jwtError.message, base64Error: base64Error.message });
         return res.status(401).json({ message: '認證失敗：無效的 token 格式' });
       }
-      */
     }
 
     if (!user || !user.isActive) {
