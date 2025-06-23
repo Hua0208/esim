@@ -14171,6 +14171,7 @@ vuetify@^3.0.0, vuetify@3.7.5:
     apexcharts "3.54.1"
     chart.js "4.4.7"
     cookie-es "1.2.2"
+    dayjs "^1.11.13"
     destr "2.0.3"
     eslint-plugin-regexp "2.7.0"
     jwt-decode "4.0.0"
