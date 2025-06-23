@@ -36,8 +36,8 @@ const errors = ref<Record<string, string | undefined>>({
 const refVForm = ref<VForm>()
 
 const credentials = ref({
-  username: 'admin',
-  password: 'localhost!',
+  username: '',
+  password: '',
   totpToken: '',
 })
 
