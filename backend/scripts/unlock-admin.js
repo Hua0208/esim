@@ -4,7 +4,7 @@ const path = require('path');
 // 資料庫連接配置
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: path.join(__dirname, 'db.sqlite'),
+    storage: path.join(__dirname, '..', 'db.sqlite'),
     logging: false
 });
 

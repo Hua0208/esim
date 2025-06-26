@@ -1,7 +1,7 @@
 const readline = require('readline');
 const bcrypt = require('bcryptjs');
-const { User } = require('./src/models');
-const sequelize = require('./src/db');
+const { User } = require('../src/models');
+const sequelize = require('../src/db');
 
 // 創建 readline 介面
 const rl = readline.createInterface({
