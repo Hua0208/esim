@@ -4,3 +4,4 @@ error.log
 combined.log
 .output
 db.sqlite
+backend/backups
